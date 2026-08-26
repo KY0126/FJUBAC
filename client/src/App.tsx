@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { lazy, Suspense } from "react";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { BrandMotionShell } from "./components/BrandMotionShell";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
@@ -16,6 +17,7 @@ const PublicLinksPage = lazy(() => import("./pages/PublicLinksPage"));
 const LearningMapPage = lazy(() => import("./pages/LearningMapPage"));
 const PublicOutcomesPage = lazy(() => import("./pages/PublicOutcomesPage"));
 const DepartmentsPage = lazy(() => import("./pages/DepartmentsPage"));
+const AccountManagementPage = lazy(() => import("./pages/AccountManagementPage"));
 const MemberWorkspacePage = lazy(() => import("./pages/MemberWorkspacePage"));
 const ManagementWorkspacePage = lazy(() => import("./pages/ManagementWorkspacePage"));
 const ResearchArchive = lazy(() => import("./pages/ResearchArchive"));
@@ -39,6 +41,7 @@ function Router() {
       <Route path={"/departments"} component={DepartmentsPage} />
       <Route path={"/workspace"} component={MemberWorkspacePage} />
       <Route path={"/manage/workspace"} component={ManagementWorkspacePage} />
+      <Route path={"/manage/accounts"} component={AccountManagementPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -61,7 +64,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <BrandMotionShell><Router /></BrandMotionShell>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
