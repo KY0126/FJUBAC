@@ -1,20 +1,41 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
+import { lazy, Suspense } from "react";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
+const RecruitmentPage = lazy(() => import("./pages/RecruitmentPage"));
+const RecruitmentManagement = lazy(() => import("./pages/RecruitmentManagement"));
+const AccountAccessPage = lazy(() => import("./pages/AccountAccessPage"));
+const AnnouncementsPage = lazy(() => import("./pages/AnnouncementsPage"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const MemberWorkspacePage = lazy(() => import("./pages/MemberWorkspacePage"));
+const ManagementWorkspacePage = lazy(() => import("./pages/ManagementWorkspacePage"));
+const ResearchArchive = lazy(() => import("./pages/ResearchArchive"));
 
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
+    <Suspense fallback={<main className="route-loading">正在載入頁面…</main>}>
+      <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/research"} component={ResearchArchive} />
+      <Route path={"/apply"} component={RecruitmentPage} />
+      <Route path={"/recruitment"} component={RecruitmentPage} />
+      <Route path={"/manage/recruitment"} component={RecruitmentManagement} />
+      <Route path={"/account"} component={AccountAccessPage} />
+      <Route path={"/announcements"} component={AnnouncementsPage} />
+      <Route path={"/events"} component={EventsPage} />
+      <Route path={"/workspace"} component={MemberWorkspacePage} />
+      <Route path={"/manage/workspace"} component={ManagementWorkspacePage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
-    </Switch>
+      </Switch>
+    </Suspense>
   );
 }
 
