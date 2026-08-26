@@ -18,4 +18,14 @@ describe("FJUBAC 校徽藍色品牌系統", () => {
     expect(home).not.toContain("SiteOnboardingOverlay");
     expect(home).not.toContain("site-onboarding");
   });
+
+  it("公開導覽列使用 FJUBAC 社徽並設定跨裝置尺寸", () => {
+    const home = source("client/src/pages/Home.tsx");
+    const publicHeader = source("client/src/components/PublicSiteHeader.tsx");
+    const css = source("client/src/blue-brand.css");
+    expect(home).toContain('fjubac-emblem-reference_4b3d690c.png');
+    expect(publicHeader).toContain('fjubac-emblem-reference_4b3d690c.png');
+    expect(css).toContain('.club-emblem { width:50px;');
+    expect(css).toContain('.club-emblem { width:40px;');
+  });
 });

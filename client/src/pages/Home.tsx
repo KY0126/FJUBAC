@@ -25,7 +25,7 @@ export default function Home() {
     <div className="site-home">
       <header className="site-header">
         <Link href="/" className="club-wordmark" aria-label="FJUBAC 首頁">
-          <span className="club-mark" aria-hidden="true"><i /><i /><i /></span>
+          <img className="club-emblem" src="/manus-storage/fjubac-emblem-reference_4b3d690c.png" alt="" />
           <span><strong>FJUBAC</strong><small>FJU BUSINESS ANALYTICS CLUB</small></span>
         </Link>
         <nav aria-label="主要導覽" className="site-nav">
@@ -90,7 +90,7 @@ export default function Home() {
         <section className="site-archive-note"><BookOpenText size={22} /><div><strong>公開內容研究檔案</strong><p>想先了解 FJUBAC 的公開內容脈絡、主題與索引，可前往獨立研究頁瀏覽。</p></div><Link href="/research">開啟研究檔案 <ArrowRight size={15} /></Link></section>
       </main>
 
-      <footer className="site-footer"><div className="club-wordmark"><span className="club-mark" aria-hidden="true"><i /><i /><i /></span><span><strong>FJUBAC</strong><small>FJU BUSINESS ANALYTICS CLUB</small></span></div><nav aria-label="頁尾導覽"><Link href="/announcements">公告</Link><Link href="/events">活動</Link><Link href="/apply">加入我們</Link><Link href="/account">社員登入</Link></nav><span>© FJUBAC</span></footer>
+      <footer className="site-footer"><div className="club-wordmark"><img className="club-emblem" src="/manus-storage/fjubac-emblem-reference_4b3d690c.png" alt="FJUBAC 社徽" /><span><strong>FJUBAC</strong><small>FJU BUSINESS ANALYTICS CLUB</small></span></div><nav aria-label="頁尾導覽"><Link href="/announcements">公告</Link><Link href="/events">活動</Link><Link href="/apply">加入我們</Link><Link href="/account">社員登入</Link></nav><span>© FJUBAC</span></footer>
     </div>
   );
 }

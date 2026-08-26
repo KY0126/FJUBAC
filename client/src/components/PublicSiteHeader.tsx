@@ -5,7 +5,7 @@ export function PublicSiteHeader({ section }: { section: string }) {
   return (
     <header className="site-subheader">
       <Link href="/" className="club-wordmark" aria-label="FJUBAC 首頁">
-        <span className="club-mark" aria-hidden="true"><i /><i /><i /></span>
+        <img className="club-emblem" src="/manus-storage/fjubac-emblem-reference_4b3d690c.png" alt="" />
         <span><strong>FJUBAC</strong><small>FJU BUSINESS ANALYTICS CLUB</small></span>
       </Link>
       <nav aria-label="公開服務導覽">
