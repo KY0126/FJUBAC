@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, gte, inArray, lte, or } from "drizzle-orm";
 import { z } from "zod";
-import { announcements, auditLogs, eventRegistrations, events, projectAssignments } from "../../drizzle/schema";
+import { announcements, auditLogs, departments, eventRegistrations, events, projectAssignments } from "../../drizzle/schema";
 import { getDb, getUserClubContext } from "../db";
 import { contentManageProcedure, eventManageProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
+import { storagePut } from "../storage";
 
 function assertDatabase<T>(database: T): asserts database is Exclude<T, null> {
   if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "資料服務暫時無法使用，請稍後再試。" });
@@ -36,20 +37,53 @@ const eventInput = z.object({
   status: z.enum(["draft", "published", "open", "full", "closed", "cancelled", "completed"]),
 });
 
+const announcementInput = z.object({
+  title: z.string().trim().min(2).max(220),
+  excerpt: z.string().trim().max(500).optional(),
+  content: z.string().trim().min(1).max(20_000),
+  category: z.enum(["general", "recruitment", "event", "academic", "external", "governance"]).default("general"),
+  coverImageDataUrl: z.string().max(8_000_000).optional(),
+  visibility: z.enum(["public", "member", "project", "officer"]),
+  status: z.enum(["draft", "published", "archived"]),
+});
+
+async function storeAnnouncementCover(dataUrl: string | undefined, actorUserId: number) {
+  if (!dataUrl) return null;
+  const matches = dataUrl.match(/^data:(image\/(?:png|jpeg|webp|gif));base64,(.+)$/);
+  if (!matches) throw new TRPCError({ code: "BAD_REQUEST", message: "公告封面必須是 PNG、JPEG、WebP 或 GIF 圖片。" });
+  const [, mimeType, encoded] = matches;
+  const buffer = Buffer.from(encoded, "base64");
+  if (buffer.byteLength > 5 * 1024 * 1024) throw new TRPCError({ code: "PAYLOAD_TOO_LARGE", message: "公告封面上限為 5MB。" });
+  const extension = mimeType.split("/")[1] === "jpeg" ? "jpg" : mimeType.split("/")[1];
+  const { url } = await storagePut(`club-announcement-covers/${actorUserId}/${Date.now()}.${extension}`, buffer, mimeType);
+  return url;
+}
+
 export const contentRouter = router({
   announcements: router({
-    publicList: publicProcedure.query(async () => {
+    publicList: publicProcedure.input(z.object({ category: z.enum(["general", "recruitment", "event", "academic", "external", "governance"]).optional() }).optional()).query(async ({ input }) => {
       const db = await getDb();
       if (!db) return [];
-      return db.select().from(announcements).where(and(eq(announcements.status, "published"), eq(announcements.visibility, "public"))).orderBy(desc(announcements.publishedAt)).limit(12);
+      const conditions = [eq(announcements.status, "published"), eq(announcements.visibility, "public")];
+      if (input?.category) conditions.push(eq(announcements.category, input.category));
+      return db.select().from(announcements).where(and(...conditions)).orderBy(desc(announcements.publishedAt)).limit(24);
     }),
-    create: contentManageProcedure.input(z.object({ title: z.string().trim().min(2).max(220), excerpt: z.string().trim().max(500).optional(), content: z.string().trim().min(1).max(20000), visibility: z.enum(["public", "member", "project", "officer"]), status: z.enum(["draft", "published", "archived"]) })).mutation(async ({ ctx, input }) => {
+    create: contentManageProcedure.input(announcementInput).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       assertDatabase(db);
       const publishedAt = input.status === "published" ? new Date() : null;
-      const result = await db.insert(announcements).values({ ...input, publishedAt, createdByUserId: ctx.user!.id });
-      await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: "announcement.created", targetType: "announcement", targetId: result[0].insertId, afterData: { status: input.status, visibility: input.visibility } });
+      const coverImageUrl = await storeAnnouncementCover(input.coverImageDataUrl, ctx.user!.id);
+      const { coverImageDataUrl: _coverImageDataUrl, ...announcementData } = input;
+      const result = await db.insert(announcements).values({ ...announcementData, coverImageUrl, publishedAt, createdByUserId: ctx.user!.id });
+      await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: "announcement.created", targetType: "announcement", targetId: result[0].insertId, afterData: { status: input.status, visibility: input.visibility, category: input.category, hasCover: Boolean(coverImageUrl) } });
       return { id: result[0].insertId };
+    }),
+  }),
+  departments: router({
+    publicList: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select({ id: departments.id, code: departments.code, name: departments.name, englishName: departments.englishName, description: departments.description }).from(departments).where(eq(departments.isActive, true)).orderBy(asc(departments.id));
     }),
   }),
   events: router({

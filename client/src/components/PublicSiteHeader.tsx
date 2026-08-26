@@ -11,6 +11,8 @@ export function PublicSiteHeader({ section }: { section: string }) {
       <nav aria-label="公開服務導覽">
         <Link href="/announcements">公告</Link>
         <Link href="/events">活動</Link>
+        <Link href="/links">資源</Link>
+        <Link href="/departments">部門</Link>
         <Link href="/research">公開研究</Link>
         <Link href="/account">社員登入</Link>
       </nav>

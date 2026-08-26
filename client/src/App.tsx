@@ -12,6 +12,10 @@ const RecruitmentManagement = lazy(() => import("./pages/RecruitmentManagement")
 const AccountAccessPage = lazy(() => import("./pages/AccountAccessPage"));
 const AnnouncementsPage = lazy(() => import("./pages/AnnouncementsPage"));
 const EventsPage = lazy(() => import("./pages/EventsPage"));
+const PublicLinksPage = lazy(() => import("./pages/PublicLinksPage"));
+const LearningMapPage = lazy(() => import("./pages/LearningMapPage"));
+const PublicOutcomesPage = lazy(() => import("./pages/PublicOutcomesPage"));
+const DepartmentsPage = lazy(() => import("./pages/DepartmentsPage"));
 const MemberWorkspacePage = lazy(() => import("./pages/MemberWorkspacePage"));
 const ManagementWorkspacePage = lazy(() => import("./pages/ManagementWorkspacePage"));
 const ResearchArchive = lazy(() => import("./pages/ResearchArchive"));
@@ -29,6 +33,10 @@ function Router() {
       <Route path={"/account"} component={AccountAccessPage} />
       <Route path={"/announcements"} component={AnnouncementsPage} />
       <Route path={"/events"} component={EventsPage} />
+      <Route path={"/links"} component={PublicLinksPage} />
+      <Route path={"/learning"} component={LearningMapPage} />
+      <Route path={"/outcomes"} component={PublicOutcomesPage} />
+      <Route path={"/departments"} component={DepartmentsPage} />
       <Route path={"/workspace"} component={MemberWorkspacePage} />
       <Route path={"/manage/workspace"} component={ManagementWorkspacePage} />
       <Route path={"/404"} component={NotFound} />

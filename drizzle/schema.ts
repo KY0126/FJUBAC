@@ -215,11 +215,15 @@ export const projects = mysqlTable(
       .notNull(),
     startsAt: timestamp("startsAt"),
     endsAt: timestamp("endsAt"),
+    isPublic: boolean("isPublic").default(false).notNull(),
+    publicSummary: text("publicSummary"),
+    publicCoverImageUrl: varchar("publicCoverImageUrl", { length: 500 }),
+    publicConsentRecordedAt: timestamp("publicConsentRecordedAt"),
     createdByUserId: int("createdByUserId").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
-  table => [index("projects_department_status_idx").on(table.departmentId, table.status)]
+  table => [index("projects_department_status_idx").on(table.departmentId, table.status), index("projects_public_idx").on(table.isPublic, table.status)]
 );
 
 export const projectAssignments = mysqlTable(
@@ -295,6 +299,8 @@ export const announcements = mysqlTable(
     title: varchar("title", { length: 220 }).notNull(),
     excerpt: varchar("excerpt", { length: 500 }),
     content: text("content").notNull(),
+    category: mysqlEnum("category", ["general", "recruitment", "event", "academic", "external", "governance"]).default("general").notNull(),
+    coverImageUrl: varchar("coverImageUrl", { length: 500 }),
     visibility: mysqlEnum("visibility", ["public", "member", "project", "officer"]).default("public").notNull(),
     status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft").notNull(),
     departmentId: int("departmentId").references(() => departments.id, { onDelete: "set null" }),
@@ -304,7 +310,7 @@ export const announcements = mysqlTable(
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
-  table => [index("announcements_public_idx").on(table.status, table.visibility, table.publishedAt)]
+  table => [index("announcements_public_idx").on(table.status, table.visibility, table.publishedAt), index("announcements_category_idx").on(table.category, table.publishedAt)]
 );
 
 export const resources = mysqlTable(
@@ -320,11 +326,12 @@ export const resources = mysqlTable(
     projectId: int("projectId").references(() => projects.id, { onDelete: "set null" }),
     departmentId: int("departmentId").references(() => departments.id, { onDelete: "set null" }),
     versionLabel: varchar("versionLabel", { length: 80 }),
+    publicConsentRecordedAt: timestamp("publicConsentRecordedAt"),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
     createdByUserId: int("createdByUserId").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  table => [index("resources_visibility_idx").on(table.visibility, table.projectId)]
+  table => [index("resources_visibility_idx").on(table.visibility, table.projectId), index("resources_public_idx").on(table.visibility, table.publicConsentRecordedAt)]
 );
 
 export const verificationCodes = mysqlTable(
