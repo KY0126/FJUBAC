@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { SiteOnboardingOverlay, SiteTourTrigger } from "@/components/SiteOnboardingOverlay";
 import { ONBOARDING_STORAGE_KEY, shouldShowOnboarding } from "@/lib/onboarding";
+import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 
 const departments = [
   { number: "01", name: "人才發展部", en: "Talent Acquisition & Engagement", text: "規劃校內外招生、書審、面試與社員參與。", tone: "coral" },
@@ -111,7 +112,7 @@ export default function Home() {
         <section className="site-archive-note"><BookOpenText size={22} /><div><strong>公開內容研究檔案</strong><p>想先了解 FJUBAC 的公開內容脈絡、主題與索引，可前往獨立研究頁瀏覽。</p></div><Link href="/research">開啟研究檔案 <ArrowRight size={15} /></Link></section>
       </main>
 
-      <footer className="site-footer"><div className="club-wordmark"><img className="club-emblem" src="/manus-storage/fjubac-emblem-reference_4b3d690c.png" alt="FJUBAC 社徽" /><span><strong>FJUBAC</strong><small>FJU BUSINESS ANALYTICS CLUB</small></span></div><nav aria-label="頁尾導覽"><Link href="/announcements">公告</Link><Link href="/events">活動</Link><Link href="/apply">加入我們</Link><Link href="/account">社員登入</Link></nav><span>© FJUBAC</span></footer>
+      <PublicSiteFooter />
     </div>
   );
 }

@@ -5,12 +5,13 @@ vi.mock("../db", () => ({
 }));
 
 import { getUserClubContext } from "../db";
-import { contentManageProcedure, router } from "../_core/trpc";
+import { contentManageProcedure, eventManageProcedure, router } from "../_core/trpc";
 import type { TrpcContext } from "../_core/context";
 import { PERMISSION_GROUPS } from "./permissions";
 
 const testRouter = router({
   managePublicContent: contentManageProcedure.query(() => ({ ok: true })),
+  manageEvent: eventManageProcedure.mutation(() => ({ ok: true })),
 });
 
 const mockedGetUserClubContext = vi.mocked(getUserClubContext);
@@ -69,5 +70,27 @@ describe("五部門後端授權程序", () => {
 
     const caller = testRouter.createCaller(createContext("user", 31));
     await expect(caller.managePublicContent()).rejects.toThrow("目前帳號未具公開內容管理權限");
+  });
+
+  it("允許具活動管理權限的幹部建立、編修與刪除活動", async () => {
+    mockedGetUserClubContext.mockResolvedValue({
+      membership: null,
+      assignments: [],
+      permissionGroups: [PERMISSION_GROUPS.eventManageDepartment],
+    });
+
+    const caller = testRouter.createCaller(createContext("user", 41));
+    await expect(caller.manageEvent()).resolves.toEqual({ ok: true });
+  });
+
+  it("拒絕一般社員修改或刪除活動", async () => {
+    mockedGetUserClubContext.mockResolvedValue({
+      membership: null,
+      assignments: [],
+      permissionGroups: [],
+    });
+
+    const caller = testRouter.createCaller(createContext("user", 42));
+    await expect(caller.manageEvent()).rejects.toThrow("目前帳號未具活動管理權限");
   });
 });

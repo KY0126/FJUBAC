@@ -3,6 +3,8 @@ import { FormEvent, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
+import { PublicSiteFooter } from "@/components/PublicSiteFooter";
+import { RecruitmentFaq } from "@/pages/RecruitmentFaq";
 
 type ApplicantType = "internal" | "external";
 
@@ -34,7 +36,7 @@ export default function RecruitmentPage() {
   };
 
   if (submittedId) {
-    return <main className="recruitment-shell"><section className="application-result"><CheckCircle2 /><p className="club-section-number">APPLICATION RECEIVED</p><h1>申請已送出。</h1><p>系統已建立申請編號 <strong>#{submittedId}</strong>。人才發展部將依此梯次流程進行書審與面試安排；後續結果會寄送至你填寫的 Email。</p><Link href="/" className="club-primary">返回社團首頁</Link></section></main>;
+    return <main className="recruitment-shell"><section className="application-result"><CheckCircle2 /><p className="club-section-number">APPLICATION RECEIVED</p><h1>申請已送出。</h1><p>系統已建立申請編號 <strong>#{submittedId}</strong>。人才發展部將依此梯次流程進行書審與面試安排；後續結果會寄送至你填寫的 Email。</p><Link href="/" className="club-primary">返回社團首頁</Link></section><PublicSiteFooter /></main>;
   }
 
   return (
@@ -54,7 +56,9 @@ export default function RecruitmentPage() {
             <div className="application-fields"><div className="form-heading"><UsersRound /><div><h2>填寫申請資料</h2><p>僅蒐集書審、面試與聯絡所需資訊。申請資料僅供人才發展部授權審核者與社長使用。</p></div></div>{submitApplication.error && <p className="form-error"><AlertCircle />{submitApplication.error.message}</p>}<div className="form-grid"><label>姓名<input name="applicantName" required maxLength={120} /></label><label>系級／年級<input name="grade" required maxLength={80} placeholder="例：企管三甲／大三" /></label>{applicantType === "internal" ? <><label>學號<input name="studentNumber" required maxLength={32} /></label><label>學校信箱<input name="schoolEmail" type="email" required maxLength={320} /></label></> : <label className="full">Email<input name="externalEmail" type="email" required maxLength={320} /></label>}<label className="full">聯絡方式<input name="contact" required maxLength={120} placeholder="例：手機、LINE ID 或其他可聯絡方式" /></label><label className="full">申請原因<textarea name="motivation" required minLength={20} maxLength={5000} rows={7} placeholder="請說明你希望在 FJUBAC 學習、實作或探索的方向。" /></label></div><button type="submit" className="club-primary" disabled={submitApplication.isPending}>{submitApplication.isPending ? "送出中…" : "送出申請資料"}</button></div>
           </form>
         )}
+        <RecruitmentFaq />
       </section>
+      <PublicSiteFooter />
     </main>
   );
 }

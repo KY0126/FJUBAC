@@ -2,6 +2,7 @@ import { Bell, CalendarDays, FileText } from "lucide-react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
+import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 
 function formatDate(value: Date | string | null) {
   if (!value) return "未發布";
@@ -14,5 +15,5 @@ export default function AnnouncementsPage() {
     : announcements.isError ? <div className="service-empty"><FileText size={28} /><h2>暫時無法載入公告。</h2><p>{announcements.error.message || "請稍後重新整理頁面，或改從首頁進入其他服務。"}</p><button className="club-primary" onClick={() => announcements.refetch()}>重新載入</button></div>
       : announcements.data?.length ? <div className="announcement-list">{announcements.data.map(item => <article className="announcement-card" key={item.id}><div><span className="status-chip">PUBLIC</span><time>{formatDate(item.publishedAt)}</time></div><h2>{item.title}</h2><p>{item.excerpt || item.content.slice(0, 160)}</p><footer><FileText size={15} />由 FJUBAC 授權單位發布</footer></article>)}</div>
         : <div className="service-empty"><FileText size={28} /><h2>目前沒有已發布的公開公告。</h2><p>後續的招生、活動與對外資訊會由各部門依權限發布。</p><Link href="/apply" className="club-primary">查看招生資訊</Link></div>;
-  return <main className="service-shell"><PublicSiteHeader section="PUBLIC BULLETIN" /><section className="service-hero"><p className="club-section-number">PUBLIC INFORMATION</p><h1>公告與資訊</h1><p>招生、活動與對外訊息將由授權部門持續更新。僅顯示已發布且設定為公開的內容。</p></section><section className="service-content"><div className="service-ledger"><Bell /><div><strong>公開範圍</strong><span>這裡收錄所有公開發布的社團訊息。</span></div></div>{content}</section><footer className="service-footer"><CalendarDays size={15} />需要活動資訊？請前往 <Link href="/events">活動頁</Link>。</footer></main>;
+  return <main className="service-shell"><PublicSiteHeader section="PUBLIC BULLETIN" /><section className="service-hero"><p className="club-section-number">PUBLIC INFORMATION</p><h1>公告與資訊</h1><p>招生、活動與對外訊息將由授權部門持續更新。僅顯示已發布且設定為公開的內容。</p></section><section className="service-content"><div className="service-ledger"><Bell /><div><strong>公開範圍</strong><span>這裡收錄所有公開發布的社團訊息。</span></div></div>{content}</section><footer className="service-footer"><CalendarDays size={15} />需要活動資訊？請前往 <Link href="/events">活動頁</Link>。</footer><PublicSiteFooter /></main>;
 }

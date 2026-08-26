@@ -72,6 +72,11 @@ export const contentRouter = router({
         : inArray(events.visibility, allowed);
       return db.select().from(events).where(and(visibilityScope, inArray(events.status, ["published", "open", "full"]))).orderBy(asc(events.startsAt));
     }),
+    listManage: eventManageProcedure.query(async () => {
+      const db = await getDb();
+      assertDatabase(db);
+      return db.select().from(events).orderBy(desc(events.startsAt));
+    }),
     create: eventManageProcedure.input(eventInput).mutation(async ({ ctx, input }) => {
       if (input.endsAt <= input.startsAt) throw new TRPCError({ code: "BAD_REQUEST", message: "活動結束時間必須晚於開始時間。" });
       if (input.registrationDeadlineAt && input.registrationDeadlineAt > input.startsAt) throw new TRPCError({ code: "BAD_REQUEST", message: "報名截止時間不得晚於活動開始時間。" });
@@ -81,6 +86,29 @@ export const contentRouter = router({
       const result = await db.insert(events).values({ ...input, projectId: input.projectId ?? null, createdByUserId: ctx.user!.id });
       await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: "event.created", targetType: "event", targetId: result[0].insertId, afterData: { visibility: input.visibility, status: input.status } });
       return { id: result[0].insertId };
+    }),
+    update: eventManageProcedure.input(eventInput.extend({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      if (input.endsAt <= input.startsAt) throw new TRPCError({ code: "BAD_REQUEST", message: "活動結束時間必須晚於開始時間。" });
+      if (input.registrationDeadlineAt && input.registrationDeadlineAt > input.startsAt) throw new TRPCError({ code: "BAD_REQUEST", message: "報名截止時間不得晚於活動開始時間。" });
+      if (input.visibility === "project" && !input.projectId) throw new TRPCError({ code: "BAD_REQUEST", message: "專案限定活動必須指定專案。" });
+      const db = await getDb();
+      assertDatabase(db);
+      const [existing] = await db.select().from(events).where(eq(events.id, input.id)).limit(1);
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "找不到要修改的活動。" });
+      const { id, ...eventData } = input;
+      await db.update(events).set({ ...eventData, projectId: eventData.projectId ?? null }).where(eq(events.id, id));
+      await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: "event.updated", targetType: "event", targetId: id, beforeData: { title: existing.title, visibility: existing.visibility, status: existing.status }, afterData: { title: eventData.title, visibility: eventData.visibility, status: eventData.status } });
+      return { id };
+    }),
+    delete: eventManageProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      assertDatabase(db);
+      const [existing] = await db.select().from(events).where(eq(events.id, input.id)).limit(1);
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "找不到要刪除的活動。" });
+      await db.delete(eventRegistrations).where(eq(eventRegistrations.eventId, input.id));
+      await db.delete(events).where(eq(events.id, input.id));
+      await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: "event.deleted", targetType: "event", targetId: input.id, beforeData: { title: existing.title, visibility: existing.visibility, status: existing.status } });
+      return { success: true } as const;
     }),
     register: protectedProcedure.input(z.object({ eventId: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
