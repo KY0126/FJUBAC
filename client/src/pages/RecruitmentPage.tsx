@@ -1,7 +1,8 @@
-import { AlertCircle, ArrowLeft, CheckCircle2, Clock3, FileText, Loader2, UsersRound } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock3, FileText, Loader2, UsersRound } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 
 type ApplicantType = "internal" | "external";
 
@@ -38,8 +39,8 @@ export default function RecruitmentPage() {
 
   return (
     <main className="recruitment-shell">
-      <header className="recruitment-header"><Link href="/" className="back-link"><ArrowLeft size={16} />返回 FJUBAC</Link><span>RECRUITMENT PORTAL</span></header>
-      <section className="recruitment-intro"><div><p className="club-section-number">JOINING PATH / 2026</p><h1>從一份申請，<br /><em>開始下一段實作。</em></h1><p>請依你的身份選擇校內或校外招生梯次。每一梯次都有獨立的申請說明、書審與面試時程；最終核准後，才能以 Email 認證碼啟用帳號。</p></div><aside><FileText /><strong>申請流程</strong><span>申請 → 書審 → 面試 → 結果 → 帳號啟用</span></aside></section>
+      <PublicSiteHeader section="RECRUITMENT PORTAL" />
+      <section className="recruitment-intro"><div><p className="club-section-number">JOIN FJUBAC</p><h1>從一份申請，<br /><em>開始下一段實作。</em></h1><p>請依你的身份選擇校內或校外招生梯次。每一梯次都有獨立的申請說明、書審與面試時程；最終核准後，才能以 Email 認證碼啟用帳號。</p></div><aside><FileText /><strong>申請流程</strong><span>申請 → 書審 → 面試 → 結果 → 帳號啟用</span></aside></section>
       <section className="recruitment-content">
         <div className="audience-toggle" role="tablist" aria-label="選擇招生梯次">
           <button role="tab" aria-selected={applicantType === "internal"} onClick={() => { setApplicantType("internal"); setCycleId(null); }}>校內申請者</button>
