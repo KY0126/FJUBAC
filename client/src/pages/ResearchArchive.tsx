@@ -1,6 +1,6 @@
 /**
  * Design system — 校園檔案室：新瑞士平面設計 × 學術檔案美學。
- * 原則：證據優先、編年與主題並行、朱砂紅校對線、側欄索引與不對稱內容帶。
+ * 原則：證據優先、編年與主題並行、校徽藍色校對線、側欄索引與不對稱內容帶。
  */
 import { useMemo, useState } from "react";
 import {
@@ -36,21 +36,21 @@ import {
 } from "@/components/ui/chart";
 import { reportData } from "@/data/researchData";
 
-const ARCHIVE_RED = "#C9472E";
+const ARCHIVE_BLUE = "#0066B3";
 const colors: Record<string, string> = {
-  "技能與方法知識": "#365B67",
-  "活動與職涯連結": "#638456",
-  "社群招募與定位": ARCHIVE_RED,
-  "貼文": "#243037",
-  "Reels": ARCHIVE_RED,
+  "技能與方法知識": "#303A73",
+  "活動與職涯連結": "#0066B3",
+  "社群招募與定位": "#35A4E8",
+  "貼文": "#303A73",
+  "Reels": ARCHIVE_BLUE,
 };
 
 const themeChartConfig = {
-  count: { label: "核對內容數", color: "#365B67" },
+  count: { label: "核對內容數", color: "#0066B3" },
 } satisfies ChartConfig;
 
 const yearChartConfig = {
-  count: { label: "核對內容數", color: ARCHIVE_RED },
+  count: { label: "核對內容數", color: ARCHIVE_BLUE },
 } satisfies ChartConfig;
 
 const contentTypes = ["全部", "貼文", "Reels"];
@@ -232,11 +232,11 @@ export default function ResearchArchive() {
               <ChartContainer config={themeChartConfig} className="theme-chart">
                 <BarChart data={[...reportData.themeTotals]} layout="vertical" margin={{ top: 4, right: 32, bottom: 0, left: 0 }}>
                   <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="name" width={112} tickLine={false} axisLine={false} tick={{ fill: "#4B4A45", fontSize: 12 }} />
-                  <ChartTooltip cursor={{ fill: "rgba(201,71,46,.08)" }} content={<ChartTooltipContent hideLabel />} />
+                  <YAxis type="category" dataKey="name" width={112} tickLine={false} axisLine={false} tick={{ fill: "#53627D", fontSize: 12 }} />
+                  <ChartTooltip cursor={{ fill: "rgba(0,102,179,.08)" }} content={<ChartTooltipContent hideLabel />} />
                   <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                     {reportData.themeTotals.map((entry) => <Cell key={entry.name} fill={colors[entry.name]} />)}
-                    <LabelList dataKey="count" position="right" fill="#243037" fontSize={13} />
+                    <LabelList dataKey="count" position="right" fill="#303A73" fontSize={13} />
                   </Bar>
                 </BarChart>
               </ChartContainer>
@@ -261,10 +261,10 @@ export default function ResearchArchive() {
               <header><span>核對內容的時間分布</span><strong>2023—2026</strong></header>
               <ChartContainer config={yearChartConfig} className="year-chart">
                 <BarChart data={[...reportData.yearTotals]} margin={{ top: 18, right: 8, bottom: 0, left: -16 }}>
-                  <XAxis dataKey="year" tickLine={false} axisLine={false} tick={{ fill: "#4B4A45", fontSize: 12 }} />
-                  <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fill: "#8A8981", fontSize: 11 }} />
-                  <ChartTooltip cursor={{ fill: "rgba(201,71,46,.08)" }} content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill={ARCHIVE_RED} radius={[3, 3, 0, 0]}><LabelList dataKey="count" position="top" fill="#243037" fontSize={12} /></Bar>
+                  <XAxis dataKey="year" tickLine={false} axisLine={false} tick={{ fill: "#53627D", fontSize: 12 }} />
+                  <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fill: "#71809A", fontSize: 11 }} />
+                  <ChartTooltip cursor={{ fill: "rgba(0,102,179,.08)" }} content={<ChartTooltipContent />} />
+                  <Bar dataKey="count" fill={ARCHIVE_BLUE} radius={[3, 3, 0, 0]}><LabelList dataKey="count" position="top" fill="#303A73" fontSize={12} /></Bar>
                 </BarChart>
               </ChartContainer>
               <div className="chart-meta"><span>編年 / 發布日期</span><span>證據 / N=19</span></div>
