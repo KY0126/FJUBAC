@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 import { RecruitmentFaq } from "@/pages/RecruitmentFaq";
+import { RecruitmentProgress } from "@/components/RecruitmentProgress";
 
 type ApplicantType = "internal" | "external";
 
@@ -42,8 +43,9 @@ export default function RecruitmentPage() {
   return (
     <main className="recruitment-shell">
       <PublicSiteHeader section="RECRUITMENT PORTAL" />
-      <section className="recruitment-intro"><div><p className="club-section-number">JOIN FJUBAC</p><h1>從一份申請，<br /><em>開始下一段實作。</em></h1><p>請依你的身份選擇校內或校外招生梯次。每一梯次都有獨立的申請說明、書審與面試時程；最終核准後，才能以 Email 認證碼啟用帳號。</p></div><aside><FileText /><strong>申請流程</strong><span>申請 → 書審 → 面試 → 結果 → 帳號啟用</span></aside></section>
+      <section className="recruitment-intro"><div><p className="club-section-number">JOIN FJUBAC</p><h1>從一份申請，<br /><em>開始下一段實作。</em></h1><p>請依你的身份選擇校內或校外招生梯次。每一梯次都有獨立的申請說明、書審與面試時程；最終核准後，才能以 Email 認證碼啟用帳號。</p></div><FileText className="recruitment-intro-icon" aria-hidden="true" /></section>
       <section className="recruitment-content">
+        <RecruitmentProgress />
         <div className="audience-toggle" role="tablist" aria-label="選擇招生梯次">
           <button role="tab" aria-selected={applicantType === "internal"} onClick={() => { setApplicantType("internal"); setCycleId(null); }}>校內申請者</button>
           <button role="tab" aria-selected={applicantType === "external"} onClick={() => { setApplicantType("external"); setCycleId(null); }}>校外申請者</button>
