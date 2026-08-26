@@ -31,4 +31,9 @@ describe("FJUBAC 校徽藍色品牌系統", () => {
     expect(css).toContain('.club-emblem { width:50px;');
     expect(css).toContain('.club-emblem { width:40px;');
   });
+
+  it("深藍主要按鈕固定使用白色文字，避免繼承周圍深色文字", () => {
+    const css = source("client/src/blue-brand.css");
+    expect(css).toContain(".club-primary,.site-button.primary,.site-header-cta,.site-subheader-actions>a,.resource-item button,.primary-action { color:#fff; }");
+  });
 });
