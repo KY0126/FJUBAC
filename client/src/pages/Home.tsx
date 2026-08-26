@@ -1,6 +1,9 @@
 import { ArrowRight, BookOpenText, CalendarDays, ChevronRight, FileText, GraduationCap, Layers3, UsersRound } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { SiteOnboardingOverlay, SiteTourTrigger } from "@/components/SiteOnboardingOverlay";
+import { ONBOARDING_STORAGE_KEY, shouldShowOnboarding } from "@/lib/onboarding";
 
 const departments = [
   { number: "01", name: "人才發展部", en: "Talent Acquisition & Engagement", text: "規劃校內外招生、書審、面試與社員參與。", tone: "coral" },
@@ -20,9 +23,26 @@ export default function Home() {
   const events = trpc.content.events.publicList.useQuery();
   const latestAnnouncements = announcements.data?.slice(0, 2) ?? [];
   const latestEvents = events.data?.slice(0, 2) ?? [];
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      setIsOnboardingOpen(shouldShowOnboarding(window.localStorage.getItem(ONBOARDING_STORAGE_KEY)));
+    } catch {
+      setIsOnboardingOpen(true);
+    }
+  }, []);
+
+  const closeOnboarding = () => {
+    setIsOnboardingOpen(false);
+    try {
+      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "complete");
+    } catch {}
+  };
 
   return (
     <div className="site-home">
+      <SiteOnboardingOverlay open={isOnboardingOpen} onClose={closeOnboarding} />
       <header className="site-header">
         <Link href="/" className="club-wordmark" aria-label="FJUBAC 首頁">
           <img className="club-emblem" src="/manus-storage/fjubac-emblem-reference_4b3d690c.png" alt="" />
@@ -36,6 +56,7 @@ export default function Home() {
           <Link href="/events">活動</Link>
           <Link href="/research">公開研究</Link>
         </nav>
+        <SiteTourTrigger onOpen={() => setIsOnboardingOpen(true)} />
         <Link href="/apply" className="site-header-cta">加入 FJUBAC <ArrowRight size={15} /></Link>
       </header>
 

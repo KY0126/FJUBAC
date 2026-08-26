@@ -12,11 +12,14 @@ describe("FJUBAC 校徽藍色品牌系統", () => {
     expect(css).toContain(".archive-shell");
   });
 
-  it("首頁維持既有快速導覽，且不含暫緩的功能導覽遮罩", () => {
+  it("首頁保留既有快速導覽，並啟用可重新開啟的功能導覽遮罩", () => {
     const home = source("client/src/pages/Home.tsx");
+    const overlay = source("client/src/components/SiteOnboardingOverlay.tsx");
     expect(home).toContain('className="site-quick-links"');
-    expect(home).not.toContain("SiteOnboardingOverlay");
-    expect(home).not.toContain("site-onboarding");
+    expect(home).toContain("SiteOnboardingOverlay");
+    expect(home).toContain("SiteTourTrigger");
+    expect(overlay).toContain("ONBOARDING_STORAGE_KEY");
+    expect(overlay).toContain('event.key === "Escape"');
   });
 
   it("公開導覽列使用 FJUBAC 社徽並設定跨裝置尺寸", () => {
