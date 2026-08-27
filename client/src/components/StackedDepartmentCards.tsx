@@ -1,13 +1,15 @@
-import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pause, Play, UserRound } from "lucide-react";
 import { CSSProperties, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
+import { getDepartmentAnchorId } from "@/lib/departmentAnchors";
 import { DEPARTMENT_ROTATE_INTERVAL_MS, getDepartmentStackLayout } from "@/lib/stackedDepartmentCards";
 
 const departments = [
-  { number: "01", name: "人才發展部", en: "Talent Acquisition & Engagement", text: "規劃校內外招生、書審、面試與社員參與。", tone: "coral" },
-  { number: "02", name: "專案開發部", en: "Project Development & Management", text: "以專案實作串起分析學習、協作與成果交付。", tone: "ink" },
-  { number: "03", name: "對外發展部", en: "External Affairs", text: "串聯合作、對外活動與職涯交流機會。", tone: "moss" },
-  { number: "04", name: "學術營運部", en: "Academic Operations", text: "經營社課、教材、學術活動與知識資源。", tone: "blue" },
-  { number: "05", name: "行銷策略部", en: "Marketing Strategy", text: "傳遞社團故事、公開內容與活動資訊。", tone: "sand" },
+  { name: "人才發展部", en: "Talent Acquisition & Engagement", text: "規劃校內外招生、書審、面試與社員參與。", tone: "coral" },
+  { name: "專案開發部", en: "Project Development & Management", text: "以專案實作串起分析學習、協作與成果交付。", tone: "ink" },
+  { name: "對外發展部", en: "External Affairs", text: "串聯合作、對外活動與職涯交流機會。", tone: "moss" },
+  { name: "學術營運部", en: "Academic Operations", text: "經營社課、教材、學術活動與知識資源。", tone: "blue" },
+  { name: "行銷策略部", en: "Marketing Strategy", text: "傳遞社團故事、公開內容與活動資訊。", tone: "sand" },
 ] as const;
 
 export function StackedDepartmentCards() {
@@ -72,8 +74,9 @@ export function StackedDepartmentCards() {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsFocusWithin(false);
   };
 
-  return <div className="site-department-stack" aria-label="五部門焦點卡片" data-autoplay-state={isAutoPaused ? "paused" : "running"} data-autoplay-reason={pauseReason} onMouseEnter={() => setIsPointerInside(true)} onMouseLeave={() => setIsPointerInside(false)} onFocusCapture={() => setIsFocusWithin(true)} onBlurCapture={stopFocusPause}>
-    <div className="site-department-stage">
+  return <div className="site-department-showcase" aria-label="五部門焦點卡片" data-autoplay-state={isAutoPaused ? "paused" : "running"} data-autoplay-reason={pauseReason} onMouseEnter={() => setIsPointerInside(true)} onMouseLeave={() => setIsPointerInside(false)} onFocusCapture={() => setIsFocusWithin(true)} onBlurCapture={stopFocusPause}>
+    <div className="site-department-stack">
+      <div className="site-department-stage">
       {departments.map((department, index) => {
         const layout = getDepartmentStackLayout(index, activeIndex, departments.length);
         const isActive = index === activeIndex;
@@ -83,29 +86,32 @@ export function StackedDepartmentCards() {
           "--stack-opacity": String(layout.opacity),
           zIndex: layout.zIndex,
         } as CSSProperties;
-        return <button
-          key={department.number}
-          ref={element => { cardRefs.current[index] = element; }}
-          type="button"
+        return <article key={department.name}
           className={`site-department-card ${department.tone} stack-offset-${layout.offset} ${isActive ? "is-active" : ""}`}
           style={style}
-          aria-pressed={isActive}
-          aria-label={`選擇${department.name}，${isActive ? "目前焦點" : ""}`}
-          onClick={() => selectDepartment(index)}
-          onKeyDown={event => onCardKeyDown(event, index)}
         >
-          <span>{department.number}</span>
+          <button ref={element => { cardRefs.current[index] = element; }} type="button" className="site-department-card-select" aria-pressed={isActive} aria-label={`選擇${department.name}，${isActive ? "目前焦點" : ""}`} onClick={() => selectDepartment(index)} onKeyDown={event => onCardKeyDown(event, index)}>
           <h3>{department.name}</h3>
           <small>{department.en}</small>
           <p>{department.text}</p>
-        </button>;
+          </button>
+          <Link href={`/departments#${getDepartmentAnchorId(department.name)}`} className="site-department-detail-link">查看部門介紹 <ArrowRight size={14} /></Link>
+        </article>;
       })}
+      </div>
+      <div className="site-department-controls" aria-label="切換部門焦點">
+        <button type="button" onClick={() => selectDepartment(activeIndex - 1)} aria-label="上一個部門"><ArrowLeft size={16} />上一個</button>
+        <p aria-live={isAutoPaused ? "polite" : "off"}><strong>{activeDepartment.name}</strong><small>{prefersReducedMotion ? "已依減少動態偏好停止自動輪播" : isManuallyPaused ? "自動輪播已暫停，可隨時恢復" : "約每 4.8 秒切換；可點選卡片或使用左右方向鍵"}</small></p>
+        <button type="button" onClick={() => selectDepartment(activeIndex + 1)} aria-label="下一個部門">下一個<ArrowRight size={16} /></button>
+      </div>
+      <button type="button" className="site-department-autoplay" disabled={prefersReducedMotion} aria-pressed={!isAutoPaused} onClick={() => setIsManuallyPaused(paused => !paused)}>{isManuallyPaused || prefersReducedMotion ? <Play size={15} /> : <Pause size={15} />}{prefersReducedMotion ? "減少動態偏好已停止輪播" : isManuallyPaused ? "啟動自動輪播" : "暫停自動輪播"}</button>
     </div>
-    <div className="site-department-controls" aria-label="切換部門焦點">
-      <button type="button" onClick={() => selectDepartment(activeIndex - 1)} aria-label="上一個部門"><ArrowLeft size={16} />上一個</button>
-      <p aria-live={isAutoPaused ? "polite" : "off"}><span>{activeDepartment.number} / {String(departments.length).padStart(2, "0")}</span><strong>{activeDepartment.name}</strong><small>{prefersReducedMotion ? "已依減少動態偏好停止自動輪播" : isManuallyPaused ? "自動輪播已暫停，可隨時恢復" : "約每 4.8 秒切換；可點選卡片或使用左右方向鍵"}</small></p>
-      <button type="button" onClick={() => selectDepartment(activeIndex + 1)} aria-label="下一個部門">下一個<ArrowRight size={16} /></button>
-    </div>
-    <button type="button" className="site-department-autoplay" disabled={prefersReducedMotion} aria-pressed={!isAutoPaused} onClick={() => setIsManuallyPaused(paused => !paused)}>{isManuallyPaused || prefersReducedMotion ? <Play size={15} /> : <Pause size={15} />}{prefersReducedMotion ? "減少動態偏好已停止輪播" : isManuallyPaused ? "啟動自動輪播" : "暫停自動輪播"}</button>
+    <aside className="site-department-leadership" aria-live="polite">
+      <p className="club-section-number">DEPARTMENT TEAM</p>
+      <h3>{activeDepartment.name}幹部資訊</h3>
+      <div className="site-department-profile-placeholder"><span aria-hidden="true"><UserRound size={25} /></span><div><strong>頭像待公開</strong><small>取得本人同意後顯示</small></div></div>
+      <dl><div><dt>姓名</dt><dd>尚未公開</dd></div><div><dt>系級</dt><dd>尚未公開</dd></div></dl>
+      <p>本區預留部長或指定幹部的公開基本資料；目前尚未取得可公開的真實資料。</p>
+    </aside>
   </div>;
 }

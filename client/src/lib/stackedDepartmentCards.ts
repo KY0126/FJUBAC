@@ -24,6 +24,6 @@ export function getDepartmentStackLayout(index: number, activeIndex: number, cou
     scale: 1 - distance * 0.13,
     opacity: 1 - distance * 0.22,
     zIndex: count - distance,
-    shift: `${offset * 114}%`,
+    shift: `${offset * 92}%`,
   };
 }
