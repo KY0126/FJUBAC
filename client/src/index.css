@@ -197,7 +197,7 @@ h2 { font-family: "Noto Serif TC", serif; font-size: clamp(32px, 3.7vw, 53px); l
 .content-row:hover { background: rgba(250,248,243,.68); }
 .content-row time { color: #77776f; font: 10px ui-monospace, monospace; }
 .content-title { display: flex; gap: 9px; align-items: center; min-width: 0; }
-.content-title strong { color: #273139; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.content-title strong { color: #273139; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
 .type-tag { background: #e0dfd8; color: #314148; border-radius: 999px; padding: 3px 7px; font-size: 9px; flex: none; }
 .type-tag.reel { background: #f4d7d0; color: #a6321e; }
 .theme-tag { color: #4f5652; font-size: 11px; display: flex; align-items: center; gap: 5px; }

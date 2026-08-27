@@ -176,4 +176,30 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(recruitment).toContain("recruitment-cycle-selection");
     expect(recruitment).toContain("recruitment-application-details");
   });
+
+  it("全頁面呈現驗收涵蓋公開、社員與管理入口的三種裝置尺寸", () => {
+    const verifier = source("scripts/verify-page-presentation.mjs");
+    expect(verifier).toContain('"/manage/accounts"');
+    expect(verifier).toContain('"/research"');
+    expect(verifier).toContain('name: "桌機"');
+    expect(verifier).toContain('name: "平板"');
+    expect(verifier).toContain('name: "手機"');
+    expect(verifier).toContain("horizontalOverflow");
+    expect(verifier).toContain("textClips");
+    expect(verifier).toContain("fixedOutOfBounds");
+    expect(verifier).toContain("persistentLoadingMessages");
+  });
+
+  it("404 頁使用繁體中文並提供語意主內容容器", () => {
+    const notFound = source("client/src/pages/NotFound.tsx");
+    expect(notFound).toContain("<main");
+    expect(notFound).toContain("找不到此頁面");
+    expect(notFound).toContain("返回首頁");
+  });
+
+  it("研究檔案索引的公開標題不使用省略號裁切", () => {
+    const stylesheet = source("client/src/index.css");
+    expect(stylesheet).toContain(".content-title strong { color: #273139; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }");
+    expect(stylesheet).not.toContain(".content-title strong { color: #273139; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }");
+  });
 });
