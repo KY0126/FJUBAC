@@ -96,6 +96,9 @@ await desktop.screenshot({ path: "/home/ubuntu/screenshots/stacked-departments-d
 await activeDesktopFrame().getByRole("link", { name: "查看部門介紹" }).click();
 await desktop.waitForURL("**/departments#department-project");
 await desktop.locator("#department-project").waitFor();
+await desktop.waitForFunction(() => document.getElementById("department-project")?.getBoundingClientRect().top > 75);
+const projectAnchorTop = await desktop.locator("#department-project").evaluate(element => element.getBoundingClientRect().top);
+if (projectAnchorTop > 170) throw new Error(`部門深連結未在固定導覽列下方的安全位置停止，目前頂部距離為 ${projectAnchorTop.toFixed(1)}px。`);
 
 const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
 await mobile.emulateMedia({ reducedMotion: "reduce" });

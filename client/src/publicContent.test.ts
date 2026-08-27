@@ -96,16 +96,27 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(recruitmentPage).toContain('from "@/lib/departmentGrowthContent"');
     expect(recruitmentPage).toContain("加分項目用於自我評估，並不代表申請門檻");
     expect(growthContent).toContain("社群經營及行銷數據分析實戰力");
-    expect(growthContent).toContain("熟悉 Canva 操作使用");
-    expect(growthContent).toContain("專業書信撰寫、往來能力");
+    expect(growthContent).toContain("熟悉 Canva 操作");
+    expect(growthContent).toContain("專業書信撰寫與往來能力");
     expect(growthContent).toContain("富有統整能力、快速理解能力");
     expect(growthContent).toContain("面試、書審設計");
     expect(growthContent).toContain("活動舉辦與籌備經驗");
-    expect(growthContent).toContain("對外關係建立、陌生合作關係開發");
+    expect(growthContent).toContain("陌生開發與合作關係建立");
     expect(growthContent).toContain("曾擔任過本社「專案生」");
     expect(growthContent).toContain("品牌打造與形象經營");
     expect(growthContent).toContain("撰寫合作企劃書、活動企劃書經驗");
     expect(departmentsPage).toContain('title="學習點"');
     expect(departmentsPage).toContain('title="加分項目"');
+  });
+
+  it("P0 可近用性樣式提供安全錨點、鍵盤焦點與表單錯誤文字回饋", () => {
+    const stylesheet = source("client/src/index.css");
+    const departmentsPage = source("client/src/pages/DepartmentsPage.tsx");
+    expect(stylesheet).toContain("scroll-margin-top:96px");
+    expect(stylesheet).toContain(":focus-visible");
+    expect(stylesheet).toContain("請檢查此欄位的格式或必填資訊");
+    expect(stylesheet).toContain(":user-invalid");
+    expect(stylesheet).toContain("prefers-contrast:more");
+    expect(departmentsPage).toContain("scrollIntoView({ block: \"start\" })");
   });
 });
