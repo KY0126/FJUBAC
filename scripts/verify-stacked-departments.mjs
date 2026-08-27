@@ -30,6 +30,16 @@ const initialLayer = await initialFocus.evaluate(element => ({
   zIndex: getComputedStyle(element).zIndex,
 }));
 if (initialLayer.opacity !== "1" || initialLayer.zIndex !== "5") throw new Error("中央部門卡片未維持完整透明度與最高層級。");
+const initialCardMetrics = await initialFocus.evaluate(element => {
+  const frame = element.parentElement;
+  const heading = element.querySelector("h3");
+  if (!frame || !heading) throw new Error("焦點卡缺少外框或部門名稱。");
+  const frameBox = frame.getBoundingClientRect();
+  const headingBox = heading.getBoundingClientRect();
+  return { height: frameBox.height, titleTopGap: headingBox.top - frameBox.top };
+});
+if (initialCardMetrics.titleTopGap < 64 || initialCardMetrics.titleTopGap > 95) throw new Error(`焦點卡上框至部門名稱的間距應約為 2 公分，目前為 ${initialCardMetrics.titleTopGap.toFixed(1)}px。`);
+if (initialCardMetrics.height > 500) throw new Error(`焦點卡不應由固定最小高度拉長，目前高度為 ${initialCardMetrics.height.toFixed(1)}px。`);
 const initialAutoFocus = await activeDesktopCard().getAttribute("aria-label");
 await desktop.mouse.move(8, 8);
 await desktop.waitForTimeout(100);
