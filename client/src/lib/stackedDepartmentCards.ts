@@ -4,6 +4,7 @@ export type DepartmentStackLayout = {
   opacity: number;
   zIndex: number;
   shift: string;
+  rotateY: number;
 };
 
 export const DEPARTMENT_ROTATE_INTERVAL_MS = 4800;
@@ -25,5 +26,6 @@ export function getDepartmentStackLayout(index: number, activeIndex: number, cou
     opacity: 1 - distance * 0.22,
     zIndex: count - distance,
     shift: `${offset * 114}%`,
+    rotateY: offset === 0 ? 0 : -offset * 6,
   };
 }

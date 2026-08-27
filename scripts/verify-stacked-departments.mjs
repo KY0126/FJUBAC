@@ -20,7 +20,7 @@ if (await cards.count() !== 5) throw new Error("五部門卡片數量不正確�
 if (await activeDesktopCard().count() !== 1) throw new Error("應恰有一張部門卡片為中央焦點。");
 if (await stack.getByText("01", { exact: true }).count()) throw new Error("首頁部門輪播不應再顯示數字編號。");
 await stack.getByRole("heading", { name: "對外發展部", exact: true }).waitFor();
-if (await stack.getByText("尚未公開", { exact: true }).count() !== 10) throw new Error("每張部門卡片的姓名與系級預留區未維持真實空狀態。");
+if (await stack.getByText("姓名｜尚未公開", { exact: true }).count() !== 5 || await stack.getByText("系級｜尚未公開", { exact: true }).count() !== 5) throw new Error("每張部門卡片的姓名與系級預留區未維持真實空狀態。");
 const initialFocus = activeDesktopFrame();
 const initialLayer = await initialFocus.evaluate(element => ({
   opacity: getComputedStyle(element).opacity,

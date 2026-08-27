@@ -84,6 +84,7 @@ export function StackedDepartmentCards() {
           "--stack-shift": layout.shift,
           "--stack-scale": String(layout.scale),
           "--stack-opacity": String(layout.opacity),
+          "--stack-rotate-y": `${layout.rotateY}deg`,
           zIndex: layout.zIndex,
         } as CSSProperties;
         return <article key={department.name}
@@ -95,8 +96,7 @@ export function StackedDepartmentCards() {
           <small>{department.en}</small>
           <div className="site-department-card-team" aria-label={`${department.name}幹部資訊尚未公開`}>
             <span aria-hidden="true"><UserRound size={17} /></span>
-            <div><strong>頭像待公開</strong><small>取得本人同意後顯示</small></div>
-            <dl><div><dt>姓名</dt><dd>尚未公開</dd></div><div><dt>系級</dt><dd>尚未公開</dd></div></dl>
+            <div><strong>姓名｜尚未公開</strong><small>系級｜尚未公開</small></div>
           </div>
           <p>{department.text}</p>
           </button>

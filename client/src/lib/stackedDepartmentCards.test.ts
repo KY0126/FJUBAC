@@ -9,10 +9,11 @@ describe("五部門疊加焦點卡片", () => {
       opacity: 1,
       zIndex: 5,
       shift: "0%",
+      rotateY: 0,
     });
   });
 
-  it("讓兩側卡片以循環順序依距離縮放、降低層級與透明度", () => {
+  it("讓兩側卡片以循環順序依距離縮放、降低層級、淡化並沿相反方向 RotateY", () => {
     const near = getDepartmentStackLayout(3, 2, 5);
     const far = getDepartmentStackLayout(4, 2, 5);
     expect(near.offset).toBe(1);
@@ -20,6 +21,8 @@ describe("五部門疊加焦點卡片", () => {
     expect(near.scale).toBeGreaterThan(far.scale);
     expect(near.opacity).toBeGreaterThan(far.opacity);
     expect(near.zIndex).toBeGreaterThan(far.zIndex);
+    expect(near.rotateY).toBeLessThan(0);
+    expect(getDepartmentStackLayout(1, 2, 5).rotateY).toBeGreaterThan(0);
   });
 
   it("可從首尾卡片循環切換，避免五張卡片出現死角", () => {
