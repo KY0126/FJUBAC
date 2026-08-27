@@ -1,22 +1,16 @@
-import { ArrowLeft, ArrowRight, Instagram, Linkedin, MessageCircle, Pause, Play, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, Instagram, Pause, Play, UserRound } from "lucide-react";
 import { CSSProperties, KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { getDepartmentAnchorId } from "@/lib/departmentAnchors";
 import { DEPARTMENT_ROTATE_INTERVAL_MS, getDepartmentStackLayout } from "@/lib/stackedDepartmentCards";
 import { trpc } from "@/lib/trpc";
 
-const SOCIALS = [
-  { label: "Instagram", href: "https://www.instagram.com/fjubac_?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==", Icon: Instagram },
-  { label: "Threads", href: "https://www.threads.com/@fjubac_", Icon: MessageCircle },
-  { label: "LinkedIn", href: "https://tw.linkedin.com/company/fjubac", Icon: Linkedin },
-] as const;
-
 const departments = [
-  { name: "人才發展部", en: "Talent Acquisition & Engagement", text: "規劃校內外招生、書審、面試與社員參與。", tone: "coral" },
-  { name: "專案開發部", en: "Project Development & Management", text: "以專案實作串起分析學習、協作與成果交付。", tone: "ink" },
-  { name: "對外發展部", en: "External Affairs", text: "串聯合作、對外活動與職涯交流機會。", tone: "moss" },
-  { name: "學術營運部", en: "Academic Operations", text: "經營社課、教材、學術活動與知識資源。", tone: "blue" },
-  { name: "行銷策略部", en: "Marketing Strategy", text: "傳遞社團故事、公開內容與活動資訊。", tone: "sand" },
+  { name: "人才發展部", code: "TAE", en: "Talent Acquisition & Engagement", tagline: "#組織凝聚的靈魂", intro: "以人為本，策劃社團徵才、Club Bonding 與 Coffee Chat (CC)。學習從組織規劃到人際連結，打造最有溫度的團隊動能！", workItems: ["社員徵才面試和選拔、舉辦說明會", "辦理內部活動：Bonding、Coffee Chat、校友活動等凝聚力活動", "研習生 1on1、期初期末社團感性環節設計"], tone: "coral" },
+  { name: "專案開發部", code: "PDM", en: "Project Development & Management", tagline: "#系統化成長的推手", intro: "全程參與專案推進、建立 Mentor 導師關係至成果發表。在這裡，你將內化強大的專案管理 (PM) 與溝通協調能力！", workItems: ["專案業主開發", "擔任專案 Mentor", "專案生 1on1", "期中、期末發表及提升專案生能力 Training 籌備"], tone: "ink" },
+  { name: "對外發展部", code: "EAF", en: "External Affairs", tagline: "#品牌開發的公關尖兵", intro: "代表社團連結外部資源，負責企業合作與大型活動策劃。累積第一線公關實戰與商務談判經驗，拓展無限視野！", workItems: ["打造外部合作關係", "舉辦對外的大型活動", "奠定日後社團對外發展的基礎與策略"], tone: "moss" },
+  { name: "學術營運部", code: "ACO", en: "Academic Operations", tagline: "#硬核實力的知識庫", intro: "規劃社課內容，涵蓋簡報邏輯、Excel 實戰及模擬案例分析 (CSG)。透過系統化學習，提升專業分析力與實戰表達力！", workItems: ["社課講師開發與接洽，設計社課環節", "舉辦 CIW、CSG 等學術性活動", "各式提升社員能力的 Project 規劃"], tone: "blue" },
+  { name: "行銷策略部", code: "MKT", en: "Marketing Strategy", tagline: "#數位時代的操盤手", intro: "主理品牌經營、社群管理與行銷策略規劃。靈活運用 Canva 等數位工具，讓你的創意與行銷思維同步升級！", workItems: ["發想並製作 IG 貼文、限動、活動宣傳內容等行銷企劃", "協助其他部門社群行銷與管理需求", "更多元的行銷管道開發", "針對輔大學生執行市場調查，擬定和執行行銷策略"], tone: "sand" },
 ] as const;
 
 export function StackedDepartmentCards() {
@@ -103,15 +97,17 @@ export function StackedDepartmentCards() {
         >
           <button ref={element => { cardRefs.current[index] = element; }} type="button" className="site-department-card-select" aria-pressed={isActive} aria-label={`選擇${department.name}，${isActive ? "目前焦點" : ""}`} onClick={() => selectDepartment(index)} onKeyDown={event => onCardKeyDown(event, index)}>
           <h3>{department.name}</h3>
-          <small>{department.en}</small>
+          <small>{department.en} · {department.code}</small>
           <div className="site-department-card-team" aria-label={`${department.name}幹部資訊尚未公開`}>
             <span aria-hidden="true"><UserRound size={17} /></span>
             <div><strong>姓名｜尚未公開</strong><small>系級｜尚未公開</small></div>
           </div>
-          <p>{department.text}</p>
+          <p className="site-department-tagline">{department.tagline}</p>
+          <p className="site-department-intro">{department.intro}</p>
+          <div className="site-department-work"><strong>工作內容</strong><ul>{department.workItems.map(item => <li key={item}>{item}</li>)}</ul></div>
           </button>
           <nav className="site-department-card-socials" aria-label={`${department.name}的 FJUBAC 公開聯絡入口`}>
-            {SOCIALS.map(({ label, href, Icon }) => <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={`在新分頁開啟 FJUBAC ${label}`}><Icon size={13} /><span>{label}</span></a>)}
+            <span className="site-department-instagram-pending" aria-label={`${department.name} Instagram 連結待提供`}><Instagram size={13} /><span>Instagram</span></span>
           </nav>
           <Link href={`/departments#${getDepartmentAnchorId(department.name)}`} className="site-department-detail-link">查看部門介紹 <ArrowRight size={14} /></Link>
         </article>;

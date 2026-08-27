@@ -60,17 +60,31 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(management).toContain('name="confirmPublicConsent"');
   });
 
-  it("部門卡片只重用已確認的正式社群連結，輪播速度由受保護設定管理", () => {
+  it("部門卡片保留未連結的 Instagram 位置，輪播速度由受保護設定管理", () => {
     const departmentCards = source("client/src/components/StackedDepartmentCards.tsx");
     const contentRouter = source("server/routers/content.ts");
     const management = source("client/src/pages/ManagementWorkspacePage.tsx");
-    expect(departmentCards).toContain("instagram.com/fjubac_");
-    expect(departmentCards).toContain("threads.com/@fjubac_");
-    expect(departmentCards).toContain("tw.linkedin.com/company/fjubac");
+    expect(departmentCards).toContain("Instagram 連結待提供");
+    expect(departmentCards).not.toContain("threads.com/@fjubac_");
+    expect(departmentCards).not.toContain("tw.linkedin.com/company/fjubac");
     expect(departmentCards).toContain("displaySettings.publicRead");
     expect(contentRouter).toContain("displaySettings: router");
     expect(contentRouter).toContain("adminProcedure.input");
     expect(contentRouter).toContain("site_display.department_carousel_interval_updated");
     expect(management).toContain("DepartmentCarouselSettingsPanel");
+  });
+
+  it("五部門卡片呈現使用者確認的定位與工作內容", () => {
+    const departmentCards = source("client/src/components/StackedDepartmentCards.tsx");
+    expect(departmentCards).toContain("#數位時代的操盤手");
+    expect(departmentCards).toContain("#硬核實力的知識庫");
+    expect(departmentCards).toContain("#組織凝聚的靈魂");
+    expect(departmentCards).toContain("#系統化成長的推手");
+    expect(departmentCards).toContain("#品牌開發的公關尖兵");
+    expect(departmentCards).toContain("IG 貼文、限動、活動宣傳內容");
+    expect(departmentCards).toContain("簡報邏輯、Excel 實戰及模擬案例分析 (CSG)");
+    expect(departmentCards).toContain("Club Bonding 與 Coffee Chat (CC)");
+    expect(departmentCards).toContain("建立 Mentor 導師關係至成果發表");
+    expect(departmentCards).toContain("企業合作與大型活動策劃");
   });
 });
