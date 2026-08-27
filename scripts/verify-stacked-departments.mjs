@@ -54,6 +54,12 @@ const allCardMetrics = await stack.locator(".site-department-card").evaluateAll(
   };
 }));
 if (allCardMetrics.some(metric => Math.abs(Number.parseFloat(metric.buttonPaddingTop) - 23.62) > .2)) throw new Error("五張卡片的標題頂部內距未一致套用減半後的視覺間距。");
+const beforeHoverBox = await initialFocus.boundingBox();
+await initialFocus.hover();
+await desktop.waitForTimeout(300);
+const afterHoverBox = await initialFocus.boundingBox();
+if (!beforeHoverBox || !afterHoverBox || afterHoverBox.height <= beforeHoverBox.height * 1.02) throw new Error("精細游標懸停時，部門卡片未提供可感知的微幅放大回饋。");
+await desktop.mouse.move(8, 8);
 const initialAutoFocus = await activeDesktopCard().getAttribute("aria-label");
 await desktop.mouse.move(8, 8);
 await desktop.waitForTimeout(100);
