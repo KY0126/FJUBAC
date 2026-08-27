@@ -130,4 +130,18 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(stylesheet).toContain("transform:translateY(-4px)");
     expect(stylesheet).toContain("@media (hover:none), (pointer:coarse)");
   });
+
+  it("P2 閱讀輔助與品牌紋理提供進度、回到頂部和減少動態支援", () => {
+    const readingAssist = source("client/src/components/ReadingAssist.tsx");
+    const publicFooter = source("client/src/components/PublicSiteFooter.tsx");
+    const stylesheet = source("client/src/index.css");
+    expect(readingAssist).toContain('aria-label="頁面閱讀進度"');
+    expect(readingAssist).toContain('aria-label="回到頁面頂端"');
+    expect(readingAssist).toContain("window.scrollTo");
+    expect(readingAssist).toContain("tabIndex={showBackToTop ? 0 : -1}");
+    expect(publicFooter).toContain("<ReadingAssist />");
+    expect(stylesheet).toContain(".reading-progress");
+    expect(stylesheet).toContain(".reading-back-to-top");
+    expect(stylesheet).toContain("P2: reading orientation and low-contrast FJUBAC data texture");
+  });
 });
