@@ -29,7 +29,7 @@ describe("公開頁尾與招生 FAQ", () => {
     const learning = source("client/src/pages/LearningMapPage.tsx");
     expect(links).toContain("已完成公開同意紀錄");
     expect(outcomes).toContain("已記錄公開同意");
-    expect(outcomes).toContain("目前尚無可公開的專案成果");
+    expect(outcomes).toContain("此學年尚無可公開的專案成果");
     expect(learning).toContain("不以範例或假資料補足");
   });
 
