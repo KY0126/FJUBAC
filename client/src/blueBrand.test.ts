@@ -72,4 +72,15 @@ describe("FJUBAC 校徽藍色品牌系統", () => {
     expect(css).toContain(".app-page-stage .account-shell>.account-header");
     expect(css).toContain(".app-page-stage .management-shell>.management-header");
   });
+
+  it("首頁招募標題與長文目錄保有可讀對比，且兩種品牌載入均維持約 3.5 秒", () => {
+    const css = source("client/src/blue-brand.css");
+    const motion = source("client/src/components/BrandMotionShell.tsx");
+    expect(css).toContain(".site-join h2 { color:#fffaf5;");
+    expect(css).toContain(".floating-toc-desktop { background:rgba(248,252,255,.72);");
+    expect(css).toContain(".floating-toc-mobile { background:rgba(248,252,255,.78);");
+    expect(motion).toContain("const BRAND_PRESENTATION_DURATION_MS = 3_500;");
+    expect(motion).toContain("setTimeout(() => setIsInitialLoading(false), BRAND_PRESENTATION_DURATION_MS)");
+    expect(motion).toContain("setTimeout(() => setIsTransitioning(false), BRAND_PRESENTATION_DURATION_MS)");
+  });
 });

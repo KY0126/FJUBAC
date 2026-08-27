@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
 const EMBLEM_URL = "/manus-storage/fjubac-emblem-reference_4b3d690c.png";
+const BRAND_PRESENTATION_DURATION_MS = 3_500;
 
 function prefersReducedMotion() {
   if (typeof window === "undefined") return false;
@@ -32,7 +33,7 @@ export function BrandMotionShell({ children }: { children: ReactNode }) {
       setIsInitialLoading(false);
       return;
     }
-    const timer = window.setTimeout(() => setIsInitialLoading(false), 620);
+    const timer = window.setTimeout(() => setIsInitialLoading(false), BRAND_PRESENTATION_DURATION_MS);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -44,7 +45,7 @@ export function BrandMotionShell({ children }: { children: ReactNode }) {
     if (prefersReducedMotion()) return;
     setIsTransitioning(true);
     if (clearTransition.current) window.clearTimeout(clearTransition.current);
-    clearTransition.current = window.setTimeout(() => setIsTransitioning(false), 260);
+    clearTransition.current = window.setTimeout(() => setIsTransitioning(false), BRAND_PRESENTATION_DURATION_MS);
   }, [location]);
 
   useEffect(() => {
