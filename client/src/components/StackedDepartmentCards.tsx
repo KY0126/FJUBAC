@@ -93,6 +93,11 @@ export function StackedDepartmentCards() {
           <button ref={element => { cardRefs.current[index] = element; }} type="button" className="site-department-card-select" aria-pressed={isActive} aria-label={`選擇${department.name}，${isActive ? "目前焦點" : ""}`} onClick={() => selectDepartment(index)} onKeyDown={event => onCardKeyDown(event, index)}>
           <h3>{department.name}</h3>
           <small>{department.en}</small>
+          <div className="site-department-card-team" aria-label={`${department.name}幹部資訊尚未公開`}>
+            <span aria-hidden="true"><UserRound size={17} /></span>
+            <div><strong>頭像待公開</strong><small>取得本人同意後顯示</small></div>
+            <dl><div><dt>姓名</dt><dd>尚未公開</dd></div><div><dt>系級</dt><dd>尚未公開</dd></div></dl>
+          </div>
           <p>{department.text}</p>
           </button>
           <Link href={`/departments#${getDepartmentAnchorId(department.name)}`} className="site-department-detail-link">查看部門介紹 <ArrowRight size={14} /></Link>
@@ -106,12 +111,5 @@ export function StackedDepartmentCards() {
       </div>
       <button type="button" className="site-department-autoplay" disabled={prefersReducedMotion} aria-pressed={!isAutoPaused} onClick={() => setIsManuallyPaused(paused => !paused)}>{isManuallyPaused || prefersReducedMotion ? <Play size={15} /> : <Pause size={15} />}{prefersReducedMotion ? "減少動態偏好已停止輪播" : isManuallyPaused ? "啟動自動輪播" : "暫停自動輪播"}</button>
     </div>
-    <aside className="site-department-leadership" aria-live="polite">
-      <p className="club-section-number">DEPARTMENT TEAM</p>
-      <h3>{activeDepartment.name}幹部資訊</h3>
-      <div className="site-department-profile-placeholder"><span aria-hidden="true"><UserRound size={25} /></span><div><strong>頭像待公開</strong><small>取得本人同意後顯示</small></div></div>
-      <dl><div><dt>姓名</dt><dd>尚未公開</dd></div><div><dt>系級</dt><dd>尚未公開</dd></div></dl>
-      <p>本區預留部長或指定幹部的公開基本資料；目前尚未取得可公開的真實資料。</p>
-    </aside>
   </div>;
 }
