@@ -10,6 +10,7 @@ describe("五部門疊加焦點卡片", () => {
       zIndex: 5,
       shift: "0%",
       rotateY: 0,
+      depth: 68,
     });
   });
 
@@ -21,8 +22,9 @@ describe("五部門疊加焦點卡片", () => {
     expect(near.scale).toBeGreaterThan(far.scale);
     expect(near.opacity).toBeGreaterThan(far.opacity);
     expect(near.zIndex).toBeGreaterThan(far.zIndex);
-    expect(near.rotateY).toBeLessThan(0);
-    expect(getDepartmentStackLayout(1, 2, 5).rotateY).toBeGreaterThan(0);
+    expect(near.rotateY).toBeGreaterThan(0);
+    expect(getDepartmentStackLayout(1, 2, 5).rotateY).toBeLessThan(0);
+    expect(near.depth).toBeGreaterThan(far.depth);
   });
 
   it("可從首尾卡片循環切換，避免五張卡片出現死角", () => {

@@ -85,6 +85,7 @@ export function StackedDepartmentCards() {
           "--stack-scale": String(layout.scale),
           "--stack-opacity": String(layout.opacity),
           "--stack-rotate-y": `${layout.rotateY}deg`,
+          "--stack-depth": `${layout.depth}px`,
           zIndex: layout.zIndex,
         } as CSSProperties;
         return <article key={department.name}
