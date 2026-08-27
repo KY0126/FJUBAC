@@ -6,6 +6,8 @@ export type DepartmentStackLayout = {
   shift: string;
 };
 
+export const DEPARTMENT_ROTATE_INTERVAL_MS = 4800;
+
 export function getCircularOffset(index: number, activeIndex: number, count: number) {
   const half = Math.floor(count / 2);
   let offset = index - activeIndex;
@@ -22,6 +24,6 @@ export function getDepartmentStackLayout(index: number, activeIndex: number, cou
     scale: 1 - distance * 0.13,
     opacity: 1 - distance * 0.22,
     zIndex: count - distance,
-    shift: `${offset * 72}%`,
+    shift: `${offset * 114}%`,
   };
 }

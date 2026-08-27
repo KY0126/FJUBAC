@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getCircularOffset, getDepartmentStackLayout } from "./stackedDepartmentCards";
+import { DEPARTMENT_ROTATE_INTERVAL_MS, getCircularOffset, getDepartmentStackLayout } from "./stackedDepartmentCards";
 
 describe("五部門疊加焦點卡片", () => {
   it("將目前焦點維持在最大、最前層且完全不透明", () => {
@@ -25,5 +25,9 @@ describe("五部門疊加焦點卡片", () => {
   it("可從首尾卡片循環切換，避免五張卡片出現死角", () => {
     expect(getCircularOffset(0, 4, 5)).toBe(1);
     expect(getCircularOffset(4, 0, 5)).toBe(-1);
+  });
+
+  it("使用一致且低干擾的前端輪播週期", () => {
+    expect(DEPARTMENT_ROTATE_INTERVAL_MS).toBe(4800);
   });
 });
