@@ -7,15 +7,17 @@ import { storageGet, storagePut } from "../storage";
 import { projectManageProcedure, protectedProcedure, publicProcedure, resourceManageProcedure, router } from "../_core/trpc";
 import { hasPublicProjectConsent, hasPublicResourceConsent } from "../club/publicContentRules";
 import { canUserReadScopedResource } from "../club/resourceAccess";
+import { projectWorkRouter } from "./projectWork";
 
 function assertDatabase<T>(database: T): asserts database is Exclude<T, null> {
   if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "資料服務暫時無法使用，請稍後再試。" });
 }
 
 const projectInput = z.object({ title: z.string().trim().min(2).max(200), description: z.string().trim().max(5000).optional(), departmentId: z.number().int().positive().optional(), startsAt: z.date().optional(), endsAt: z.date().optional(), status: z.enum(["draft", "active", "completed", "archived", "cancelled"]), isPublic: z.boolean().default(false), publicSummary: z.string().trim().max(5000).optional(), confirmPublicConsent: z.boolean().default(false) });
-const resourceInput = z.object({ title: z.string().trim().min(2).max(200), description: z.string().trim().max(5000).optional(), fileName: z.string().trim().min(1).max(255), mimeType: z.string().trim().max(120), dataUrl: z.string().min(16).max(14_000_000), visibility: z.enum(["public", "member", "project", "officer"]), projectId: z.number().int().positive().optional(), departmentId: z.number().int().positive().optional(), versionLabel: z.string().trim().max(80).optional(), confirmPublicConsent: z.boolean().default(false) });
+const resourceInput = z.object({ title: z.string().trim().min(2).max(200), description: z.string().trim().max(5000).optional(), fileName: z.string().trim().min(1).max(255), mimeType: z.string().trim().max(120), dataUrl: z.string().min(16).max(14_000_000), visibility: z.enum(["public", "member", "project", "officer"]), projectId: z.number().int().positive().optional(), departmentId: z.number().int().positive().optional(), versionLabel: z.string().trim().max(80).optional(), supersedesResourceId: z.number().int().positive().optional(), confirmPublicConsent: z.boolean().default(false) });
 
 export const workspaceRouter = router({
+  projectWork: projectWorkRouter,
   projects: router({
     mine: protectedProcedure.query(async ({ ctx }) => {
       const db = await getDb();
@@ -34,10 +36,45 @@ export const workspaceRouter = router({
       await db.insert(auditLogs).values({ actorUserId: actor.id, action: "project.created", targetType: "project", targetId: result[0].insertId, afterData: { status: input.status, isPublic: input.isPublic, publicConsentRecordedAt: input.isPublic } });
       return { id: result[0].insertId };
     }),
+    update: projectManageProcedure.input(projectInput.extend({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      if (input.startsAt && input.endsAt && input.endsAt <= input.startsAt) throw new TRPCError({ code: "BAD_REQUEST", message: "專案結束時間必須晚於開始時間。" });
+      if (!hasPublicProjectConsent(input)) throw new TRPCError({ code: "BAD_REQUEST", message: "公開成果需填寫公開摘要並確認已取得公開同意。" });
+      const db = await getDb();
+      assertDatabase(db);
+      const [existing] = await db.select().from(projects).where(eq(projects.id, input.id)).limit(1);
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "找不到要修改的專案。" });
+      const { id, confirmPublicConsent: _confirmPublicConsent, ...projectData } = input;
+      await db.update(projects).set({ ...projectData, description: input.description ?? null, departmentId: input.departmentId ?? null, startsAt: input.startsAt ?? null, endsAt: input.endsAt ?? null, publicSummary: input.isPublic ? input.publicSummary ?? null : null, publicConsentRecordedAt: input.isPublic ? existing.publicConsentRecordedAt ?? new Date() : null }).where(eq(projects.id, id));
+      await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: "project.updated", targetType: "project", targetId: id, beforeData: { status: existing.status, isPublic: existing.isPublic }, afterData: { status: input.status, isPublic: input.isPublic } });
+      return { id };
+    }),
+    withdrawPublic: projectManageProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      assertDatabase(db);
+      const [existing] = await db.select().from(projects).where(eq(projects.id, input.id)).limit(1);
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "找不到指定專案。" });
+      await db.update(projects).set({ isPublic: false, publicSummary: null }).where(eq(projects.id, input.id));
+      await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: "project.public_withdrawn", targetType: "project", targetId: input.id, beforeData: { isPublic: existing.isPublic, publicSummary: existing.publicSummary }, afterData: { isPublic: false } });
+      return { success: true };
+    }),
+    archive: projectManageProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      assertDatabase(db);
+      const [existing] = await db.select().from(projects).where(eq(projects.id, input.id)).limit(1);
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "找不到指定專案。" });
+      await db.update(projects).set({ status: "archived", isPublic: false, publicSummary: null }).where(eq(projects.id, input.id));
+      await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: "project.archived", targetType: "project", targetId: input.id, beforeData: { status: existing.status, isPublic: existing.isPublic }, afterData: { status: "archived", isPublic: false } });
+      return { success: true };
+    }),
     listManage: projectManageProcedure.query(async () => {
       const db = await getDb();
       assertDatabase(db);
       return db.select().from(projects).where(inArray(projects.status, ["draft", "active", "completed"])).orderBy(desc(projects.updatedAt));
+    }),
+    resourceScopeList: resourceManageProcedure.query(async () => {
+      const db = await getDb();
+      assertDatabase(db);
+      return db.select({ id: projects.id, title: projects.title, status: projects.status }).from(projects).where(inArray(projects.status, ["draft", "active", "completed"])).orderBy(desc(projects.updatedAt));
     }),
     publicList: publicProcedure.query(async () => {
       const db = await getDb();
@@ -85,6 +122,12 @@ export const workspaceRouter = router({
       for (const item of all) if (await canUserReadScopedResource(ctx.user.id, item)) permitted.push(item);
       return permitted.map(({ storageKey: _storageKey, ...item }) => item);
     }),
+    listManage: resourceManageProcedure.query(async () => {
+      const db = await getDb();
+      assertDatabase(db);
+      const result = await db.select().from(resources).orderBy(desc(resources.updatedAt));
+      return result.map(({ storageKey: _storageKey, ...resource }) => resource);
+    }),
     download: protectedProcedure.input(z.object({ resourceId: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       assertDatabase(db);
@@ -117,9 +160,17 @@ export const workspaceRouter = router({
       assertDatabase(db);
       const actor = ctx.user;
       if (!actor) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (input.projectId) {
+        const [project] = await db.select({ id: projects.id }).from(projects).where(and(inArray(projects.status, ["draft", "active", "completed"]), eq(projects.id, input.projectId))).limit(1);
+        if (!project) throw new TRPCError({ code: "BAD_REQUEST", message: "指定的專案不存在或已封存，無法上傳此範圍資源。" });
+      }
+      if (input.supersedesResourceId) {
+        const [previous] = await db.select().from(resources).where(eq(resources.id, input.supersedesResourceId)).limit(1);
+        if (!previous || previous.projectId !== (input.projectId ?? null) || previous.visibility !== input.visibility) throw new TRPCError({ code: "BAD_REQUEST", message: "新版資源必須取代同一專案範圍與可見範圍的既有資源。" });
+      }
       const upload = await storagePut(`club-resources/${actor.id}/${input.fileName}`, buffer, input.mimeType || encodedMime);
-      const result = await db.insert(resources).values({ title: input.title, description: input.description ?? null, storageKey: upload.key, fileName: input.fileName, mimeType: input.mimeType || encodedMime, visibility: input.visibility, projectId: input.projectId ?? null, departmentId: input.departmentId ?? null, versionLabel: input.versionLabel ?? null, publicConsentRecordedAt: input.visibility === "public" ? new Date() : null, createdByUserId: actor.id });
-      await db.insert(auditLogs).values({ actorUserId: actor.id, action: "resource.uploaded", targetType: "resource", targetId: result[0].insertId, afterData: { visibility: input.visibility, fileName: input.fileName, publicConsentRecordedAt: input.visibility === "public" } });
+      const result = await db.insert(resources).values({ title: input.title, description: input.description ?? null, storageKey: upload.key, fileName: input.fileName, mimeType: input.mimeType || encodedMime, visibility: input.visibility, projectId: input.projectId ?? null, departmentId: input.departmentId ?? null, versionLabel: input.versionLabel ?? null, supersedesResourceId: input.supersedesResourceId ?? null, publicConsentRecordedAt: input.visibility === "public" ? new Date() : null, createdByUserId: actor.id });
+      await db.insert(auditLogs).values({ actorUserId: actor.id, action: "resource.uploaded", targetType: "resource", targetId: result[0].insertId, afterData: { visibility: input.visibility, fileName: input.fileName, supersedesResourceId: input.supersedesResourceId ?? null, publicConsentRecordedAt: input.visibility === "public" } });
       return { id: result[0].insertId };
     }),
   }),

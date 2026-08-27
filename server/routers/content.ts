@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, gte, inArray, lte, or } from "drizzle-orm";
 import { z } from "zod";
-import { announcements, auditLogs, departments, eventRegistrations, events, projectAssignments } from "../../drizzle/schema";
+import { announcements, auditLogs, departments, eventRegistrations, events, projectAssignments, users } from "../../drizzle/schema";
 import { getDb, getUserClubContext } from "../db";
 import { contentManageProcedure, eventManageProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { storagePut } from "../storage";
@@ -106,10 +106,22 @@ export const contentRouter = router({
         : inArray(events.visibility, allowed);
       return db.select().from(events).where(and(visibilityScope, inArray(events.status, ["published", "open", "full"]))).orderBy(asc(events.startsAt));
     }),
+    myRegistrationStatuses: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      assertDatabase(db);
+      return db.select({ eventId: eventRegistrations.eventId, status: eventRegistrations.status, waitlistPosition: eventRegistrations.waitlistPosition }).from(eventRegistrations).where(eq(eventRegistrations.userId, ctx.user.id));
+    }),
     listManage: eventManageProcedure.query(async () => {
       const db = await getDb();
       assertDatabase(db);
       return db.select().from(events).orderBy(desc(events.startsAt));
+    }),
+    registrationsManage: eventManageProcedure.input(z.object({ eventId: z.number().int().positive() })).query(async ({ input }) => {
+      const db = await getDb();
+      assertDatabase(db);
+      const [event] = await db.select({ id: events.id }).from(events).where(eq(events.id, input.eventId)).limit(1);
+      if (!event) throw new TRPCError({ code: "NOT_FOUND", message: "找不到指定活動。" });
+      return db.select({ registration: eventRegistrations, user: { id: users.id, name: users.name, email: users.email, studentNumber: users.studentNumber } }).from(eventRegistrations).innerJoin(users, eq(eventRegistrations.userId, users.id)).where(eq(eventRegistrations.eventId, input.eventId)).orderBy(asc(eventRegistrations.registeredAt));
     }),
     create: eventManageProcedure.input(eventInput).mutation(async ({ ctx, input }) => {
       if (input.endsAt <= input.startsAt) throw new TRPCError({ code: "BAD_REQUEST", message: "活動結束時間必須晚於開始時間。" });
@@ -168,6 +180,16 @@ export const contentRouter = router({
       if (!registration || ["cancelled", "attended", "absent"].includes(registration.status)) throw new TRPCError({ code: "BAD_REQUEST", message: "目前沒有可取消的有效報名。" });
       await db.update(eventRegistrations).set({ status: "cancelled", cancelledAt: new Date() }).where(eq(eventRegistrations.id, registration.id));
       await db.insert(auditLogs).values({ actorUserId: ctx.user.id, action: "event.registration_cancelled", targetType: "event", targetId: input.eventId });
+      return { success: true };
+    }),
+    markAttendance: eventManageProcedure.input(z.object({ registrationId: z.number().int().positive(), status: z.enum(["attended", "absent"]) })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      assertDatabase(db);
+      const [registration] = await db.select().from(eventRegistrations).where(eq(eventRegistrations.id, input.registrationId)).limit(1);
+      if (!registration) throw new TRPCError({ code: "NOT_FOUND", message: "找不到活動報名資料。" });
+      if (!["registered", "waitlisted", "attended", "absent"].includes(registration.status)) throw new TRPCError({ code: "BAD_REQUEST", message: "已取消的報名無法登錄出席。" });
+      await db.update(eventRegistrations).set({ status: input.status }).where(eq(eventRegistrations.id, input.registrationId));
+      await db.insert(auditLogs).values({ actorUserId: ctx.user!.id, action: `event.attendance_marked_${input.status}`, targetType: "event", targetId: registration.eventId, beforeData: { registrationId: registration.id, status: registration.status }, afterData: { registrationId: registration.id, status: input.status } });
       return { success: true };
     }),
   }),

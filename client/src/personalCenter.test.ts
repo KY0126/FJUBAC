@@ -55,6 +55,9 @@ describe("個人帳號中心", () => {
     expect(page).toContain("站內通知");
     expect(page).toContain("個人異動／稽核摘要");
     expect(page).toContain("通知、隱私與動態");
+    expect(page).toContain("workspace.projectWork.mine.useQuery");
+    expect(page).toContain("取消報名");
+    expect(page).toContain("content.events.cancelRegistration.useMutation");
     expect(motion).toContain("fjubac-user-reduced-motion");
     expect(styles).toContain('data-fjubac-reduced-motion="true"');
   });

@@ -9,6 +9,7 @@ const state = vi.hoisted(() => ({
   },
   projects: { isLoading: false, isError: false, data: [], refetch: vi.fn() },
   resources: { isLoading: false, isError: false, data: [], refetch: vi.fn() },
+  tasks: { isLoading: false, isError: false, data: [], refetch: vi.fn() },
 }));
 
 vi.mock("@/_core/hooks/useAuth", () => ({
@@ -23,6 +24,7 @@ vi.mock("@/lib/trpc", () => ({
   trpc: {
     workspace: {
       projects: { mine: { useQuery: () => state.projects } },
+      projectWork: { mine: { useQuery: () => state.tasks } },
       resources: {
         list: { useQuery: () => state.resources },
         download: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
@@ -43,6 +45,7 @@ describe("MemberWorkspacePage 社員存取", () => {
     state.auth = { user: null, isAuthenticated: false };
     state.projects = { isLoading: false, isError: false, data: [], refetch: vi.fn() };
     state.resources = { isLoading: false, isError: false, data: [], refetch: vi.fn() };
+    state.tasks = { isLoading: false, isError: false, data: [], refetch: vi.fn() };
   });
 
   it("將未登入訪客導向社員登入入口", () => {
@@ -58,6 +61,8 @@ describe("MemberWorkspacePage 社員存取", () => {
     const html = renderToStaticMarkup(<MemberWorkspacePage />);
 
     expect(html).toContain("我的學習與實作");
+    expect(html).toContain("我的待辦");
+    expect(html).toContain("目前沒有指派給你的實際待辦");
     expect(html).toContain("目前沒有有效專案指派");
     expect(html).toContain("目前沒有可存取的資源");
   });

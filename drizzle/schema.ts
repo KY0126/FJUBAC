@@ -1,5 +1,6 @@
 import {
   boolean,
+  foreignKey,
   index,
   int,
   json,
@@ -253,6 +254,48 @@ export const projectAssignments = mysqlTable(
   ]
 );
 
+export const projectMilestones = mysqlTable(
+  "projectMilestones",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    projectId: int("projectId")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description"),
+    dueAt: timestamp("dueAt"),
+    status: mysqlEnum("status", ["planned", "in_progress", "completed", "archived"]).default("planned").notNull(),
+    sortOrder: int("sortOrder").default(0).notNull(),
+    createdByUserId: int("createdByUserId").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("project_milestones_project_status_idx").on(table.projectId, table.status), index("project_milestones_due_idx").on(table.projectId, table.dueAt)]
+);
+
+export const projectTasks = mysqlTable(
+  "projectTasks",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    projectId: int("projectId")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    milestoneId: int("milestoneId").references(() => projectMilestones.id, { onDelete: "set null" }),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description"),
+    assigneeUserId: int("assigneeUserId").references(() => users.id, { onDelete: "set null" }),
+    status: mysqlEnum("status", ["todo", "in_progress", "blocked", "completed", "cancelled"]).default("todo").notNull(),
+    priority: mysqlEnum("priority", ["low", "normal", "high"]).default("normal").notNull(),
+    dueAt: timestamp("dueAt"),
+    completedAt: timestamp("completedAt"),
+    sortOrder: int("sortOrder").default(0).notNull(),
+    createdByUserId: int("createdByUserId").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("project_tasks_project_status_idx").on(table.projectId, table.status), index("project_tasks_assignee_status_idx").on(table.assigneeUserId, table.status), index("project_tasks_milestone_idx").on(table.milestoneId)]
+);
+
 export const events = mysqlTable(
   "events",
   {
@@ -331,12 +374,38 @@ export const resources = mysqlTable(
     projectId: int("projectId").references(() => projects.id, { onDelete: "set null" }),
     departmentId: int("departmentId").references(() => departments.id, { onDelete: "set null" }),
     versionLabel: varchar("versionLabel", { length: 80 }),
+    supersedesResourceId: int("supersedesResourceId"),
     publicConsentRecordedAt: timestamp("publicConsentRecordedAt"),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
     createdByUserId: int("createdByUserId").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  table => [index("resources_visibility_idx").on(table.visibility, table.projectId), index("resources_public_idx").on(table.visibility, table.publicConsentRecordedAt)]
+  table => [
+    index("resources_visibility_idx").on(table.visibility, table.projectId),
+    index("resources_public_idx").on(table.visibility, table.publicConsentRecordedAt),
+    index("resources_supersedes_idx").on(table.supersedesResourceId),
+    foreignKey({ columns: [table.supersedesResourceId], foreignColumns: [table.id], name: "resources_supersedesResourceId_resources_id_fk" }).onDelete("set null"),
+  ]
+);
+
+export const projectDeliverables = mysqlTable(
+  "projectDeliverables",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    projectId: int("projectId")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    taskId: int("taskId").references(() => projectTasks.id, { onDelete: "set null" }),
+    resourceId: int("resourceId").references(() => resources.id, { onDelete: "set null" }),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description"),
+    status: mysqlEnum("status", ["draft", "submitted", "accepted", "archived"]).default("draft").notNull(),
+    submittedByUserId: int("submittedByUserId").references(() => users.id, { onDelete: "set null" }),
+    submittedAt: timestamp("submittedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("project_deliverables_project_status_idx").on(table.projectId, table.status), index("project_deliverables_task_idx").on(table.taskId), index("project_deliverables_resource_idx").on(table.resourceId)]
 );
 
 export const userPreferences = mysqlTable(

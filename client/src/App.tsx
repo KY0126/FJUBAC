@@ -21,6 +21,7 @@ const AccountManagementPage = lazy(() => import("./pages/AccountManagementPage")
 const PersonalCenterPage = lazy(() => import("./pages/PersonalCenterPage"));
 const MemberWorkspacePage = lazy(() => import("./pages/MemberWorkspacePage"));
 const ManagementWorkspacePage = lazy(() => import("./pages/ManagementWorkspacePage"));
+const ProjectContentManagementPage = lazy(() => import("./pages/ProjectContentManagementPage"));
 const ResearchArchive = lazy(() => import("./pages/ResearchArchive"));
 
 function Router() {
@@ -43,6 +44,7 @@ function Router() {
       <Route path={"/departments"} component={DepartmentsPage} />
       <Route path={"/workspace"} component={MemberWorkspacePage} />
       <Route path={"/manage/workspace"} component={ManagementWorkspacePage} />
+      <Route path={"/manage/project-content"} component={ProjectContentManagementPage} />
       <Route path={"/manage/accounts"} component={AccountManagementPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
