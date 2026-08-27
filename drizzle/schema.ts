@@ -508,6 +508,18 @@ export const scheduledJobs = mysqlTable(
   table => [index("scheduled_jobs_task_uid_idx").on(table.scheduleCronTaskUid)]
 );
 
+/**
+ * Singleton settings for public-site display behaviour. The canonical row uses id=1
+ * and is written only through the audited admin setting procedure.
+ */
+export const siteDisplaySettings = mysqlTable("siteDisplaySettings", {
+  id: int("id").primaryKey(),
+  departmentCarouselIntervalMs: int("departmentCarouselIntervalMs").default(3800).notNull(),
+  updatedByUserId: int("updatedByUserId").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const auditLogs = mysqlTable(
   "auditLogs",
   {

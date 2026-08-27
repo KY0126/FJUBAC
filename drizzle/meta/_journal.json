@@ -50,6 +50,13 @@
       "when": 1787795186563,
       "tag": "0006_true_bill_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1787802551592,
+      "tag": "0007_tricky_freak",
+      "breakpoints": true
     }
   ]
 }

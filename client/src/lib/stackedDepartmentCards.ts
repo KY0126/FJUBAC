@@ -8,7 +8,7 @@ export type DepartmentStackLayout = {
   depth: number;
 };
 
-export const DEPARTMENT_ROTATE_INTERVAL_MS = 4800;
+export const DEPARTMENT_ROTATE_INTERVAL_MS = 3800;
 
 export function getCircularOffset(index: number, activeIndex: number, count: number) {
   const half = Math.floor(count / 2);

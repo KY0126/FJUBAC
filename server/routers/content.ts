@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, gte, inArray, lte, or } from "drizzle-orm";
 import { z } from "zod";
-import { announcements, auditLogs, departments, eventRegistrations, events, projectAssignments, users } from "../../drizzle/schema";
+import { announcements, auditLogs, departments, eventRegistrations, events, projectAssignments, siteDisplaySettings, users } from "../../drizzle/schema";
 import { getDb, getUserClubContext } from "../db";
-import { contentManageProcedure, eventManageProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
+import { adminProcedure, contentManageProcedure, eventManageProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { storagePut } from "../storage";
+import { DEPARTMENT_CAROUSEL_DEFAULT_INTERVAL_MS, DEPARTMENT_CAROUSEL_MAX_INTERVAL_MS, DEPARTMENT_CAROUSEL_MIN_INTERVAL_MS } from "../club/siteDisplaySettings";
 
 function assertDatabase<T>(database: T): asserts database is Exclude<T, null> {
   if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "資料服務暫時無法使用，請稍後再試。" });
@@ -60,6 +61,28 @@ async function storeAnnouncementCover(dataUrl: string | undefined, actorUserId: 
 }
 
 export const contentRouter = router({
+  displaySettings: router({
+    publicRead: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return { departmentCarouselIntervalMs: DEPARTMENT_CAROUSEL_DEFAULT_INTERVAL_MS };
+      const [settings] = await db.select({ departmentCarouselIntervalMs: siteDisplaySettings.departmentCarouselIntervalMs }).from(siteDisplaySettings).where(eq(siteDisplaySettings.id, 1)).limit(1);
+      return { departmentCarouselIntervalMs: settings?.departmentCarouselIntervalMs ?? DEPARTMENT_CAROUSEL_DEFAULT_INTERVAL_MS };
+    }),
+    manageRead: adminProcedure.query(async () => {
+      const db = await getDb();
+      assertDatabase(db);
+      const [settings] = await db.select({ departmentCarouselIntervalMs: siteDisplaySettings.departmentCarouselIntervalMs, updatedAt: siteDisplaySettings.updatedAt }).from(siteDisplaySettings).where(eq(siteDisplaySettings.id, 1)).limit(1);
+      return settings ?? { departmentCarouselIntervalMs: DEPARTMENT_CAROUSEL_DEFAULT_INTERVAL_MS, updatedAt: null };
+    }),
+    update: adminProcedure.input(z.object({ departmentCarouselIntervalMs: z.number().int().min(DEPARTMENT_CAROUSEL_MIN_INTERVAL_MS).max(DEPARTMENT_CAROUSEL_MAX_INTERVAL_MS) })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      assertDatabase(db);
+      const [existing] = await db.select({ departmentCarouselIntervalMs: siteDisplaySettings.departmentCarouselIntervalMs }).from(siteDisplaySettings).where(eq(siteDisplaySettings.id, 1)).limit(1);
+      await db.insert(siteDisplaySettings).values({ id: 1, departmentCarouselIntervalMs: input.departmentCarouselIntervalMs, updatedByUserId: ctx.user.id }).onDuplicateKeyUpdate({ set: { departmentCarouselIntervalMs: input.departmentCarouselIntervalMs, updatedByUserId: ctx.user.id } });
+      await db.insert(auditLogs).values({ actorUserId: ctx.user.id, action: "site_display.department_carousel_interval_updated", targetType: "site_display_settings", targetId: 1, beforeData: { departmentCarouselIntervalMs: existing?.departmentCarouselIntervalMs ?? DEPARTMENT_CAROUSEL_DEFAULT_INTERVAL_MS }, afterData: { departmentCarouselIntervalMs: input.departmentCarouselIntervalMs } });
+      return { departmentCarouselIntervalMs: input.departmentCarouselIntervalMs };
+    }),
+  }),
   announcements: router({
     publicList: publicProcedure.input(z.object({ category: z.enum(["general", "recruitment", "event", "academic", "external", "governance"]).optional() }).optional()).query(async ({ input }) => {
       const db = await getDb();

@@ -59,4 +59,18 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(management).toContain("setCoverFile");
     expect(management).toContain('name="confirmPublicConsent"');
   });
+
+  it("部門卡片只重用已確認的正式社群連結，輪播速度由受保護設定管理", () => {
+    const departmentCards = source("client/src/components/StackedDepartmentCards.tsx");
+    const contentRouter = source("server/routers/content.ts");
+    const management = source("client/src/pages/ManagementWorkspacePage.tsx");
+    expect(departmentCards).toContain("instagram.com/fjubac_");
+    expect(departmentCards).toContain("threads.com/@fjubac_");
+    expect(departmentCards).toContain("tw.linkedin.com/company/fjubac");
+    expect(departmentCards).toContain("displaySettings.publicRead");
+    expect(contentRouter).toContain("displaySettings: router");
+    expect(contentRouter).toContain("adminProcedure.input");
+    expect(contentRouter).toContain("site_display.department_carousel_interval_updated");
+    expect(management).toContain("DepartmentCarouselSettingsPanel");
+  });
 });

@@ -33,6 +33,6 @@ describe("五部門疊加焦點卡片", () => {
   });
 
   it("使用一致且低干擾的前端輪播週期", () => {
-    expect(DEPARTMENT_ROTATE_INTERVAL_MS).toBe(4800);
+    expect(DEPARTMENT_ROTATE_INTERVAL_MS).toBe(3800);
   });
 });

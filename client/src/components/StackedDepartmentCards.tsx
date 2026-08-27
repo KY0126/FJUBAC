@@ -1,8 +1,15 @@
-import { ArrowLeft, ArrowRight, Pause, Play, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, Instagram, Linkedin, MessageCircle, Pause, Play, UserRound } from "lucide-react";
 import { CSSProperties, KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { getDepartmentAnchorId } from "@/lib/departmentAnchors";
 import { DEPARTMENT_ROTATE_INTERVAL_MS, getDepartmentStackLayout } from "@/lib/stackedDepartmentCards";
+import { trpc } from "@/lib/trpc";
+
+const SOCIALS = [
+  { label: "Instagram", href: "https://www.instagram.com/fjubac_?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==", Icon: Instagram },
+  { label: "Threads", href: "https://www.threads.com/@fjubac_", Icon: MessageCircle },
+  { label: "LinkedIn", href: "https://tw.linkedin.com/company/fjubac", Icon: Linkedin },
+] as const;
 
 const departments = [
   { name: "人才發展部", en: "Talent Acquisition & Engagement", text: "規劃校內外招生、書審、面試與社員參與。", tone: "coral" },
@@ -20,7 +27,9 @@ export function StackedDepartmentCards() {
   const [isDocumentVisible, setIsDocumentVisible] = useState(true);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const displaySettings = trpc.content.displaySettings.publicRead.useQuery();
   const activeDepartment = departments[activeIndex];
+  const rotationIntervalMs = displaySettings.data?.departmentCarouselIntervalMs ?? DEPARTMENT_ROTATE_INTERVAL_MS;
   const isAutoPaused = isManuallyPaused || isPointerInside || isFocusWithin || !isDocumentVisible || prefersReducedMotion;
   const pauseReason = prefersReducedMotion ? "reduced-motion" : !isDocumentVisible ? "document-hidden" : isManuallyPaused ? "manual" : isFocusWithin ? "focus" : isPointerInside ? "pointer" : "none";
 
@@ -40,9 +49,9 @@ export function StackedDepartmentCards() {
 
   useEffect(() => {
     if (isAutoPaused) return;
-    const timer = window.setInterval(() => setActiveIndex(index => (index + 1) % departments.length), DEPARTMENT_ROTATE_INTERVAL_MS);
+    const timer = window.setInterval(() => setActiveIndex(index => (index + 1) % departments.length), rotationIntervalMs);
     return () => window.clearInterval(timer);
-  }, [isAutoPaused]);
+  }, [isAutoPaused, rotationIntervalMs]);
 
   const selectDepartment = (index: number, shouldFocus = false, isManual = true) => {
     const nextIndex = (index + departments.length) % departments.length;
@@ -101,13 +110,16 @@ export function StackedDepartmentCards() {
           </div>
           <p>{department.text}</p>
           </button>
+          <nav className="site-department-card-socials" aria-label={`${department.name}的 FJUBAC 公開聯絡入口`}>
+            {SOCIALS.map(({ label, href, Icon }) => <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={`在新分頁開啟 FJUBAC ${label}`}><Icon size={13} /><span>{label}</span></a>)}
+          </nav>
           <Link href={`/departments#${getDepartmentAnchorId(department.name)}`} className="site-department-detail-link">查看部門介紹 <ArrowRight size={14} /></Link>
         </article>;
       })}
       </div>
       <div className="site-department-controls" aria-label="切換部門焦點">
         <button type="button" onClick={() => selectDepartment(activeIndex - 1)} aria-label="上一個部門"><ArrowLeft size={16} />上一個</button>
-        <p aria-live={isAutoPaused ? "polite" : "off"}><strong>{activeDepartment.name}</strong><small>{prefersReducedMotion ? "已依減少動態偏好停止自動輪播" : isManuallyPaused ? "自動輪播已暫停，可隨時恢復" : "約每 4.8 秒切換；可點選卡片或使用左右方向鍵"}</small></p>
+        <p aria-live={isAutoPaused ? "polite" : "off"}><strong>{activeDepartment.name}</strong><small>{prefersReducedMotion ? "已依減少動態偏好停止自動輪播" : isManuallyPaused ? "自動輪播已暫停，可隨時恢復" : `約每 ${(rotationIntervalMs / 1000).toFixed(1)} 秒切換；可點選卡片或使用左右方向鍵`}</small></p>
         <button type="button" onClick={() => selectDepartment(activeIndex + 1)} aria-label="下一個部門">下一個<ArrowRight size={16} /></button>
       </div>
       <button type="button" className="site-department-autoplay" disabled={prefersReducedMotion} aria-pressed={!isAutoPaused} onClick={() => setIsManuallyPaused(paused => !paused)}>{isManuallyPaused || prefersReducedMotion ? <Play size={15} /> : <Pause size={15} />}{prefersReducedMotion ? "減少動態偏好已停止輪播" : isManuallyPaused ? "啟動自動輪播" : "暫停自動輪播"}</button>

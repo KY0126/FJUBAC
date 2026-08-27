@@ -21,6 +21,8 @@ if (await activeDesktopCard().count() !== 1) throw new Error("應恰有一張部
 if (await stack.getByText("01", { exact: true }).count()) throw new Error("首頁部門輪播不應再顯示數字編號。");
 await stack.getByRole("heading", { name: "對外發展部", exact: true }).waitFor();
 if (await stack.getByText("姓名｜尚未公開", { exact: true }).count() !== 5 || await stack.getByText("系級｜尚未公開", { exact: true }).count() !== 5) throw new Error("每張部門卡片的姓名與系級預留區未維持真實空狀態。");
+if (await stack.getByRole("link", { name: "在新分頁開啟 FJUBAC Instagram" }).count() !== 5 || await stack.getByRole("link", { name: "在新分頁開啟 FJUBAC Threads" }).count() !== 5 || await stack.getByRole("link", { name: "在新分頁開啟 FJUBAC LinkedIn" }).count() !== 5) throw new Error("每張部門卡片應只顯示已確認的 FJUBAC 官方社群入口。");
+if (await stack.getByText(/約每 3\.8 秒切換/).count() !== 1) throw new Error("輪播在未設定管理值時應使用 3.8 秒預設值。");
 const initialFocus = activeDesktopFrame();
 const initialLayer = await initialFocus.evaluate(element => ({
   opacity: getComputedStyle(element).opacity,
