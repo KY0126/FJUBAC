@@ -60,5 +60,5 @@ export function BrandMotionShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <><div className="brand-motion-content">{children}</div>{isInitialLoading ? <div className="brand-loader" role="status" aria-label="正在載入 FJUBAC 網站"><div className="brand-loader-inner"><img src={EMBLEM_URL} alt="" /><span>FJUBAC</span><small>FJU BUSINESS ANALYTICS CLUB</small></div></div> : null}<div className={`brand-route-curtain${isTransitioning ? " is-visible" : ""}`} aria-hidden="true"><div className="brand-route-curtain-mark"><img src={EMBLEM_URL} alt="" /><span>FJUBAC</span></div></div></>;
+  return <><div className="brand-motion-content">{children}</div>{isInitialLoading ? <div className="brand-loader" role="status" aria-label="正在載入 FJUBAC 網站"><div className="brand-loader-inner"><img src={EMBLEM_URL} alt="" /></div></div> : null}<div className={`brand-route-curtain${isTransitioning ? " is-visible" : ""}`} aria-hidden="true"><div className="brand-route-curtain-mark"><img src={EMBLEM_URL} alt="" /></div></div></>;
 }
