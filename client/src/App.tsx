@@ -5,6 +5,7 @@ import { lazy, Suspense } from "react";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { BrandMotionShell } from "./components/BrandMotionShell";
+import { SiteChrome } from "./components/SiteChrome";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
@@ -68,7 +69,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <BrandMotionShell><Router /></BrandMotionShell>
+          <SiteChrome><BrandMotionShell><Router /></BrandMotionShell></SiteChrome>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

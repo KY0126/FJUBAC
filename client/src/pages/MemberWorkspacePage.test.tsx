@@ -18,6 +18,7 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 
 vi.mock("wouter", () => ({
   Link: ({ children }: { children: unknown }) => children,
+  useLocation: () => ["/workspace", vi.fn()],
 }));
 
 vi.mock("@/lib/trpc", () => ({
@@ -48,22 +49,10 @@ describe("MemberWorkspacePage 社員存取", () => {
     state.tasks = { isLoading: false, isError: false, data: [], refetch: vi.fn() };
   });
 
-  it("將未登入訪客導向社員登入入口", () => {
+  it("保留舊網址並導向整合後的個人中心工作區", () => {
     const html = renderToStaticMarkup(<MemberWorkspacePage />);
 
-    expect(html).toContain("社員工作區需要登入");
-    expect(html).toContain("社員登入");
-  });
-
-  it("讓登入的一般社員進入專案與資源工作區", () => {
-    state.auth = { user: { name: "一般社員" }, isAuthenticated: true };
-
-    const html = renderToStaticMarkup(<MemberWorkspacePage />);
-
-    expect(html).toContain("我的學習與實作");
-    expect(html).toContain("我的待辦");
-    expect(html).toContain("目前沒有指派給你的實際待辦");
-    expect(html).toContain("目前沒有有效專案指派");
-    expect(html).toContain("目前沒有可存取的資源");
+    expect(html).toContain("社員工作區已整合至個人中心");
+    expect(html).toContain("前往個人中心");
   });
 });

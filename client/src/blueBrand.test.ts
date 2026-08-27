@@ -46,10 +46,30 @@ describe("FJUBAC 校徽藍色品牌系統", () => {
     expect(publicHeader).toContain("我要申請");
     expect(css).toContain(".public-nav-toggle");
     expect(css).toContain(".public-nav-cluster-label");
+    expect(publicHeader).not.toContain("社員工作區</Link>");
   });
 
   it("深藍主要按鈕固定使用白色文字，避免繼承周圍深色文字", () => {
     const css = source("client/src/blue-brand.css");
     expect(css).toContain(".club-primary,.site-button.primary,.site-header-cta,.site-subheader-actions>a,.resource-item button,.primary-action { color:#fff; }");
+  });
+
+  it("所有路由由共用殼層提供唯一頁首、頁尾與回到頂部控制", () => {
+    const app = source("client/src/App.tsx");
+    const chrome = source("client/src/components/SiteChrome.tsx");
+    const home = source("client/src/pages/Home.tsx");
+    expect(app).toContain("<SiteChrome><BrandMotionShell><Router /></BrandMotionShell></SiteChrome>");
+    expect(chrome).toContain("<ReadingAssist />");
+    expect(chrome).toContain("<PublicSiteHeader");
+    expect(chrome).toContain("<PublicSiteFooter");
+    expect(home).not.toContain("FloatingTableOfContents");
+  });
+
+  it("內部頁使用明確前景色，並在共用頁首存在時隱藏舊式局部頁首", () => {
+    const css = source("client/src/blue-brand.css");
+    expect(css).toContain(".workspace-shell,.manage-shell,.management-shell { background:#f8fafd; color:var(--blue-ink); }");
+    expect(css).toContain(".app-page-stage :is(.account-shell,.personal-shell,.workspace-shell,.manage-shell)>.workspace-header");
+    expect(css).toContain(".app-page-stage .account-shell>.account-header");
+    expect(css).toContain(".app-page-stage .management-shell>.management-header");
   });
 });

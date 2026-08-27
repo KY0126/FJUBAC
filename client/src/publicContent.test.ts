@@ -131,21 +131,23 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(stylesheet).toContain("@media (hover:none), (pointer:coarse)");
   });
 
-  it("P2 閱讀輔助與品牌紋理提供進度、回到頂部和減少動態支援", () => {
+  it("全站閱讀輔助與品牌紋理提供進度、回到頂部和減少動態支援", () => {
     const readingAssist = source("client/src/components/ReadingAssist.tsx");
-    const publicFooter = source("client/src/components/PublicSiteFooter.tsx");
+    const siteChrome = source("client/src/components/SiteChrome.tsx");
     const stylesheet = source("client/src/index.css");
     expect(readingAssist).toContain('aria-label="頁面閱讀進度"');
     expect(readingAssist).toContain('aria-label="回到頁面頂端"');
     expect(readingAssist).toContain("window.scrollTo");
     expect(readingAssist).toContain("tabIndex={showBackToTop ? 0 : -1}");
-    expect(publicFooter).toContain("<ReadingAssist />");
+    expect(siteChrome).toContain("<ReadingAssist />");
+    expect(siteChrome).toContain("<PublicSiteHeader");
+    expect(siteChrome).toContain("<PublicSiteFooter");
     expect(stylesheet).toContain(".reading-progress");
     expect(stylesheet).toContain(".reading-back-to-top");
     expect(stylesheet).toContain("P2: reading orientation and low-contrast FJUBAC data texture");
   });
 
-  it("長篇公開頁提供浮動章節目錄、實際錨點與目前段落標示", () => {
+  it("長篇公開頁提供浮動章節目錄、實際錨點與目前段落標示，首頁則不顯示目錄", () => {
     const toc = source("client/src/components/FloatingTableOfContents.tsx");
     const home = source("client/src/pages/Home.tsx");
     const departments = source("client/src/pages/DepartmentsPage.tsx");
@@ -161,6 +163,7 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(toc).toContain('mobileDetails?.removeAttribute("open")');
     expect(toc).toContain("floating-toc-mobile");
     expect(home).toContain("id=\"join\"");
+    expect(home).not.toContain("FloatingTableOfContents");
     expect(departments).toContain("departmentSections");
     expect(departments).toContain("trackScroll={false}");
     expect(learning).toContain("learning-stage-${step}");
@@ -188,6 +191,9 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(verifier).toContain("textClips");
     expect(verifier).toContain("fixedOutOfBounds");
     expect(verifier).toContain("persistentLoadingMessages");
+    expect(verifier).toContain("siteHeaderCount");
+    expect(verifier).toContain("siteFooterCount");
+    expect(verifier).toContain("backToTopCount");
   });
 
   it("404 頁使用繁體中文並提供語意主內容容器", () => {
@@ -201,5 +207,17 @@ describe("公開頁尾與招生 FAQ", () => {
     const stylesheet = source("client/src/index.css");
     expect(stylesheet).toContain(".content-title strong { color: #273139; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }");
     expect(stylesheet).not.toContain(".content-title strong { color: #273139; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }");
+  });
+
+  it("個人中心整合資源、專案與任務，並以真實有效專案指派顯示社員或專案生", () => {
+    const personal = source("client/src/pages/PersonalCenterPage.tsx");
+    const workspace = source("client/src/pages/MemberWorkspacePage.tsx");
+    expect(personal).toContain('const memberRole = workspaceProjects.data?.length ? "專案生" : "社員"');
+    expect(personal).toContain('id="workspace"');
+    expect(personal).toContain("我的資源與專案工作區");
+    expect(personal).toContain("05 / RESOURCE HISTORY");
+    expect(personal).toContain("06 / FAVORITES");
+    expect(personal).toContain("07 / ACCOUNT ACTIVITY");
+    expect(workspace).toContain('setLocation("/me#workspace")');
   });
 });

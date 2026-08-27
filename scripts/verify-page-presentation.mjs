@@ -37,16 +37,22 @@ for (const viewport of viewports) {
           return rect.width > 0 && rect.height > 0 && (rect.right > window.innerWidth + 2 || rect.left < -2 || rect.bottom > window.innerHeight + 2 || rect.top < -2);
         })
         .map(element => element.className || element.tagName);
-      return { hasMain: Boolean(main), hasVisibleText: visibleText.length > 12, persistentLoadingMessages, horizontalOverflow, textClips, fixedOutOfBounds };
+      const siteHeaderCount = document.querySelectorAll(".site-subheader").length;
+      const siteFooterCount = document.querySelectorAll(".public-site-footer").length;
+      const backToTopCount = document.querySelectorAll(".reading-back-to-top[aria-label='回到頁面頂端']").length;
+      return { hasMain: Boolean(main), hasVisibleText: visibleText.length > 12, persistentLoadingMessages, horizontalOverflow, textClips, fixedOutOfBounds, siteHeaderCount, siteFooterCount, backToTopCount };
     });
     if (!result.hasMain || !result.hasVisibleText) throw new Error(`${viewport.name} ${route} 未完成可讀頁面載入。`);
     if (result.persistentLoadingMessages.length) throw new Error(`${viewport.name} ${route} 等待後仍停留在載入狀態：${result.persistentLoadingMessages.join("、")}。`);
     if (result.horizontalOverflow) throw new Error(`${viewport.name} ${route} 出現水平溢出。`);
     if (result.textClips.length) throw new Error(`${viewport.name} ${route} 出現疑似文字裁切：${result.textClips.join("、")}。`);
     if (result.fixedOutOfBounds.length) throw new Error(`${viewport.name} ${route} 有固定控制超出視窗：${result.fixedOutOfBounds.join("、")}。`);
+    if (result.siteHeaderCount !== 1) throw new Error(`${viewport.name} ${route} 應只保留一套共用頁首，實際為 ${result.siteHeaderCount} 套。`);
+    if (result.siteFooterCount !== 1) throw new Error(`${viewport.name} ${route} 缺少或重複顯示共用頁尾，實際為 ${result.siteFooterCount} 套。`);
+    if (result.backToTopCount !== 1) throw new Error(`${viewport.name} ${route} 缺少或重複顯示回到頂部控制，實際為 ${result.backToTopCount} 個。`);
     await page.close();
   }
 }
 
 await browser.close();
-console.log("全頁面呈現驗收通過：17 條路由於桌機、平板、手機均完成載入，未見水平溢出、疑似文字裁切或固定控制超出視窗。 ");
+console.log("全頁面呈現驗收通過：17 條路由於桌機、平板、手機均完成載入，均有唯一共用頁首頁尾與回到頂部控制，且未見水平溢出、疑似文字裁切或固定控制超出視窗。 ");

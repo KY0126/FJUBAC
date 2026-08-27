@@ -7,7 +7,6 @@ import { ONBOARDING_STORAGE_KEY, shouldShowOnboarding } from "@/lib/onboarding";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { StackedDepartmentCards } from "@/components/StackedDepartmentCards";
-import { FloatingTableOfContents } from "@/components/FloatingTableOfContents";
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "即將發布";
@@ -39,8 +38,7 @@ export default function Home() {
   return (
     <div className="site-home">
       <SiteOnboardingOverlay open={isOnboardingOpen} onClose={closeOnboarding} />
-      <PublicSiteHeader section="首頁" utilityAction={<SiteTourTrigger onOpen={() => setIsOnboardingOpen(true)} />} />
-      <FloatingTableOfContents sections={[{ id: "updates", label: "最新資訊" }, { id: "about", label: "認識 FJUBAC" }, { id: "departments", label: "五部門" }, { id: "join", label: "加入我們" }]} />
+      <PublicSiteHeader section="首頁" />
 
       <main>
         <section className="site-hero" aria-labelledby="home-title">
@@ -52,6 +50,7 @@ export default function Home() {
             <div className="site-hero-actions">
               <Link href="/apply" className="site-button primary">了解招生與申請 <ArrowRight size={17} /></Link>
               <a href="#updates" className="site-button text">查看最新資訊 <ChevronRight size={16} /></a>
+              <SiteTourTrigger onOpen={() => setIsOnboardingOpen(true)} />
             </div>
           </div>
           <aside className="site-quick-links" aria-label="快速導覽">
@@ -80,7 +79,7 @@ export default function Home() {
 
         <section id="about" className="site-section site-about" aria-labelledby="about-title">
           <div className="site-about-copy"><p className="site-eyebrow">ABOUT FJUBAC</p><h2 id="about-title">從理解資料，<br />到理解<strong>決策與人。</strong></h2></div>
-          <div className="site-about-body"><p>我們相信分析並不只是工具，而是一種看待問題、溝通觀點與推動行動的方法。社團從分析框架出發，串起社課、專案、交流與職涯探索。</p><div className="site-link-row"><Link href="/research"><BookOpenText size={17} />閱讀公開內容研究</Link><Link href="/workspace"><Layers3 size={17} />前往社員工作區</Link></div></div>
+          <div className="site-about-body"><p>我們相信分析並不只是工具，而是一種看待問題、溝通觀點與推動行動的方法。社團從分析框架出發，串起社課、專案、交流與職涯探索。</p><div className="site-link-row"><Link href="/research"><BookOpenText size={17} />閱讀公開內容研究</Link><Link href="/me#workspace"><Layers3 size={17} />前往個人中心工作區</Link></div></div>
         </section>
 
         <section id="departments" className="site-section site-departments" aria-labelledby="departments-title">

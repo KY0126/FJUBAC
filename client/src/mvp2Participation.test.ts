@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const workspace = readFileSync(new URL("./pages/MemberWorkspacePage.tsx", import.meta.url), "utf8");
+const personalCenter = readFileSync(new URL("./pages/PersonalCenterPage.tsx", import.meta.url), "utf8");
 const tasks = readFileSync(new URL("./components/MyTaskSummary.tsx", import.meta.url), "utf8");
 const projectWork = readFileSync(new URL("./components/ProjectWorkPanel.tsx", import.meta.url), "utf8");
 const eventManagement = readFileSync(new URL("./components/EventManagementPanel.tsx", import.meta.url), "utf8");
@@ -9,10 +10,12 @@ const eventsPage = readFileSync(new URL("./pages/EventsPage.tsx", import.meta.ur
 const lifecycle = readFileSync(new URL("./pages/ProjectContentManagementPage.tsx", import.meta.url), "utf8");
 
 describe("MVP-2 社員參與與成長介面", () => {
-  it("在社員工作區呈現真實待辦空狀態，並由本人任務查詢提供資料", () => {
-    expect(workspace).toContain("<MyTaskSummary />");
+  it("在個人中心整合工作區呈現真實待辦空狀態，並保留舊工作區網址的導向", () => {
+    expect(personalCenter).toContain("workspace.projectWork.mine.useQuery");
+    expect(personalCenter).toContain("目前沒有指派給你的實際待辦");
+    expect(personalCenter).toContain('id="workspace"');
+    expect(workspace).toContain('setLocation("/me#workspace")');
     expect(tasks).toContain("workspace.projectWork.mine.useQuery");
-    expect(tasks).toContain("目前沒有指派給你的實際待辦");
   });
 
   it("在專案工作面板提供里程碑、任務與交付物生命週期，而不提供示範資料", () => {
