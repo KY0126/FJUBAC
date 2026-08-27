@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
 const EMBLEM_URL = "/manus-storage/fjubac-emblem-reference_4b3d690c.png";
-const BRAND_PRESENTATION_DURATION_MS = 3_500;
+const BRAND_PRESENTATION_DURATION_MS = 1_800;
 
 function prefersReducedMotion() {
   if (typeof window === "undefined") return false;

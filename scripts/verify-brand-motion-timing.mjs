@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const baseUrl = process.env.BASE_URL || "http://127.0.0.1:3000";
-const duration = 3_500;
+const duration = 1_800;
 const browser = await chromium.launch({ executablePath: "/usr/bin/chromium", headless: true, args: ["--no-sandbox"] });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
@@ -25,4 +25,4 @@ await page.waitForTimeout(1_150);
 if (await curtain.count() !== 0) throw new Error("品牌換頁動畫未於約 3.5 秒後結束。");
 
 await browser.close();
-console.log("品牌載入驗收通過：進入網站與內部換頁遮罩均維持約 3.5 秒。 ");
+console.log("品牌載入驗收通過：進入網站與內部換頁遮罩均維持約 1.8 秒。 ");

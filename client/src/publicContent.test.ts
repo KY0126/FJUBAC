@@ -178,7 +178,7 @@ describe("公開頁尾與招生 FAQ", () => {
     const timingVerifier = source("scripts/verify-brand-motion-timing.mjs");
     expect(blueBrand).toContain(".floating-toc-desktop { background:rgba(248,252,255,.72);");
     expect(blueBrand).toContain(".floating-toc-mobile { background:rgba(248,252,255,.78);");
-    expect(timingVerifier).toContain("const duration = 3_500;");
+    expect(timingVerifier).toContain("const duration = 1_800;");
     const recruitment = source("client/src/pages/RecruitmentPage.tsx");
     expect(recruitment).toContain("recruitmentSections");
     expect(recruitment).toContain("recruitment-cycle-selection");

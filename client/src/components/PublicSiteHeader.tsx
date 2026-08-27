@@ -38,8 +38,8 @@ export function PublicSiteHeader({ section, utilityAction, global = false }: { s
           <summary className={linkClass("/learning", "/outcomes", "/research")} aria-current={isCurrent("/learning", "/outcomes", "/research") ? "page" : undefined}>探索 FJUBAC <ChevronDown size={14} /></summary>
           <div className="public-nav-dropdown-menu">
             <Link href="/learning" onClick={closeMenu} className={linkClass("/learning")} aria-current={isCurrent("/learning") ? "page" : undefined}>學習地圖</Link>
-            <Link href="/outcomes" onClick={closeMenu} className={linkClass("/outcomes")} aria-current={isCurrent("/outcomes") ? "page" : undefined}>公開成果</Link>
-            <Link href="/research" onClick={closeMenu} className={linkClass("/research")} aria-current={isCurrent("/research") ? "page" : undefined}>公開研究檔案</Link>
+            <Link href="/research" onClick={closeMenu} className={linkClass("/research")} aria-current={isCurrent("/research") ? "page" : undefined}>社課教學紀錄</Link>
+            <Link href="/outcomes" onClick={closeMenu} className={linkClass("/outcomes")} aria-current={isCurrent("/outcomes") ? "page" : undefined}>公開專案成果</Link>
           </div>
         </details>
       </div>

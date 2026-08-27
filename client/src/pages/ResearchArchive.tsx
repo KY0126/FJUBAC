@@ -55,6 +55,8 @@ const yearChartConfig = {
 
 const contentTypes = ["全部", "貼文", "Reels"];
 const contentThemes = ["全部", ...reportData.themeTotals.map((entry) => entry.name)];
+const schoolYearFor = (date: string) => { const value = new Date(`${date}T00:00:00`); const year = value.getFullYear(); return value.getMonth() >= 8 ? `${year}-${year + 1}` : `${year - 1}-${year}`; };
+const schoolYears = ["全部", ...Array.from(new Set(reportData.items.map(item => schoolYearFor(item.date))))].sort((a, b) => b.localeCompare(a));
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("zh-TW", {
@@ -68,6 +70,7 @@ export default function ResearchArchive() {
 
   const [selectedType, setSelectedType] = useState("全部");
   const [selectedTheme, setSelectedTheme] = useState("全部");
+  const [selectedSchoolYear, setSelectedSchoolYear] = useState("全部");
   const [copied, setCopied] = useState(false);
 
   const filteredItems = useMemo(
@@ -75,9 +78,10 @@ export default function ResearchArchive() {
       reportData.items.filter(
         (item) =>
           (selectedType === "全部" || item.type === selectedType) &&
-          (selectedTheme === "全部" || item.theme === selectedTheme),
+          (selectedTheme === "全部" || item.theme === selectedTheme) &&
+          (selectedSchoolYear === "全部" || schoolYearFor(item.date) === selectedSchoolYear),
       ),
-    [selectedTheme, selectedType],
+    [selectedTheme, selectedType, selectedSchoolYear],
   );
 
   const shareReport = async () => {
@@ -99,8 +103,8 @@ export default function ResearchArchive() {
             alt="抽象檔案索引卡標誌"
           />
           <span>
-            <small>公開內容研究</small>
-            <strong>社群檔案室</strong>
+            <small>社課教學紀錄</small>
+            <strong>知識內容卡片</strong>
           </span>
         </a>
 
@@ -135,7 +139,7 @@ export default function ResearchArchive() {
               <img src="/manus-storage/fjubac-archive-mark_d244c157.png" alt="朱砂紅與石墨灰的檔案索引卡標誌" />
               <span><small>ARCHIVE MARK</small><strong>PUBLIC DOSSIER</strong></span>
             </div>
-            <h1>從公開索引<br /><em>回看內容脈絡</em></h1>
+            <h1>社課教學紀錄<br /><em>回看知識脈絡</em></h1>
             <p className="hero-lede">
               以可驗證的貼文、Reels 與精選動態名稱，整理 <strong>FJUBAC 輔大商業分析社</strong>如何把能力培養、職涯連結與社群招募編織成一條內容路徑。
             </p>
@@ -309,7 +313,7 @@ export default function ResearchArchive() {
           <div className="section-heading compact">
             <div>
               <div className="eyebrow-line"><span />06 / PUBLIC CONTENT INDEX</div>
-              <h2>逐筆查看，<br />回到公開來源。</h2>
+              <h2>社課教學，<br />用卡片回看。</h2>
             </div>
             <p>這是 19 則以直接公開網址核對的內容索引。使用篩選器縮小範圍，再開啟來源頁自行查閱。</p>
           </div>
@@ -324,16 +328,17 @@ export default function ResearchArchive() {
               <span>主題</span>
               {contentThemes.map((theme) => <button key={theme} type="button" aria-pressed={selectedTheme === theme} onClick={() => setSelectedTheme(theme)}>{theme}</button>)}
             </div>
+            <div className="filter-group"><span>學年</span>{schoolYears.map((year) => <button key={year} type="button" aria-pressed={selectedSchoolYear === year} onClick={() => setSelectedSchoolYear(year)}>{year}</button>)}</div>
           </div>
 
           <div className="index-status"><Search size={15} />索引篩選結果：<strong>{filteredItems.length}</strong> / {reportData.items.length} 則已核對內容</div>
-          <div className="content-table" role="table" aria-label="公開內容索引表">
+          <div className="content-table teaching-card-grid" aria-label="社課教學紀錄卡片">
             <div className="content-table-head" role="row">
               <span>日期</span><span>內容</span><span>主題</span><span>公開互動</span><span>來源</span>
             </div>
             {filteredItems.map((item) => (
-              <article className="content-row" key={item.id} role="row">
-                <time dateTime={item.date}>{formatDate(item.date)}</time>
+              <article className="content-row teaching-record-card" key={item.id}>
+                <time dateTime={item.date}>{schoolYearFor(item.date)} · {formatDate(item.date)}</time>
                 <div className="content-title"><span className={`type-tag ${item.type === "Reels" ? "reel" : ""}`}>{item.type}</span><strong>{item.title}</strong></div>
                 <span className="theme-tag" style={{ "--tag-color": colors[item.theme] } as React.CSSProperties}>{item.theme}</span>
                 <span className="interaction-text">{item.likes === null ? "未公開" : `${item.likes} 讚`}{item.comments === null ? "" : ` · ${item.comments} 留言`}</span>
