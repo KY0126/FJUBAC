@@ -4,7 +4,6 @@ import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { ReadingAssist } from "@/components/ReadingAssist";
 import { SiteChromeContext } from "@/components/SiteChromeContext";
-import { PersonalCheckInHistory } from "@/components/PersonalCheckInHistory";
 
 const SECTION_BY_PATH: Record<string, string> = {
   "/": "首頁",
@@ -36,7 +35,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
     <div className="app-frame">
       <ReadingAssist />
       <PublicSiteHeader section={getSection(pathname)} global />
-      <div className="app-page-stage">{children}{pathname === "/me" ? <PersonalCheckInHistory /> : null}</div>
+      <div className="app-page-stage">{children}</div>
       <PublicSiteFooter global />
     </div>
   </SiteChromeContext.Provider>;

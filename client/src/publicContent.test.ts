@@ -208,6 +208,16 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(notFound).toContain("返回首頁");
   });
 
+  it("社課教學紀錄以逐項卡片呈現八類標籤，並支援關鍵字與學年組合篩選", () => {
+    const research = source("client/src/pages/ResearchArchive.tsx");
+    expect(research).toContain("const tags =");
+    expect(research).toContain("商業分析與管顧基礎");
+    expect(research).toContain("社團運作與學習場景");
+    expect(research).toContain("selectedYear");
+    expect(research).toContain("keyword");
+    expect(research).toContain("teaching-record-card");
+  });
+
   it("研究檔案索引的公開標題不使用省略號裁切", () => {
     const stylesheet = source("client/src/index.css");
     expect(stylesheet).toContain(".content-title strong { color: #273139; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }");
