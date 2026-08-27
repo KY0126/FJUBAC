@@ -57,6 +57,13 @@
       "when": 1787802551592,
       "tag": "0007_tricky_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1787815970370,
+      "tag": "0008_broad_joshua_kane",
+      "breakpoints": true
     }
   ]
 }

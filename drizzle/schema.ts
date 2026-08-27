@@ -340,6 +340,68 @@ export const eventRegistrations = mysqlTable(
   table => [uniqueIndex("event_registrations_unique").on(table.eventId, table.userId), index("event_registrations_status_idx").on(table.eventId, table.status)]
 );
 
+/**
+ * A QR attendance session is an officer-managed, time-bounded window for one event.
+ * tokenHash is deliberately one-way: the raw QR token is returned only at creation
+ * or rotation time and is never persisted alongside event/member data.
+ */
+export const eventCheckInSessions = mysqlTable(
+  "eventCheckInSessions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    eventId: int("eventId")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    label: varchar("label", { length: 100 }).notNull(),
+    status: mysqlEnum("status", ["active", "paused", "closed"]).default("active").notNull(),
+    tokenHash: varchar("tokenHash", { length: 128 }).notNull(),
+    startsAt: timestamp("startsAt").notNull(),
+    endsAt: timestamp("endsAt").notNull(),
+    createdByUserId: int("createdByUserId").references(() => users.id, { onDelete: "set null" }),
+    rotatedAt: timestamp("rotatedAt"),
+    closedAt: timestamp("closedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("event_checkin_sessions_event_status_idx").on(table.eventId, table.status), uniqueIndex("event_checkin_sessions_token_hash_unique").on(table.tokenHash)]
+);
+
+/**
+ * One immutable attendance outcome per user/event. QR scans and officer fallback
+ * corrections both identify the underlying registration and leave an audit trail.
+ */
+export const eventCheckIns = mysqlTable(
+  "eventCheckIns",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    eventId: int("eventId")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    sessionId: int("sessionId")
+      .notNull()
+      .references(() => eventCheckInSessions.id, { onDelete: "cascade" }),
+    registrationId: int("registrationId")
+      .notNull()
+      .references(() => eventRegistrations.id, { onDelete: "cascade" }),
+    userId: int("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    method: mysqlEnum("method", ["qr", "manual"]).notNull(),
+    attendanceStatus: mysqlEnum("attendanceStatus", ["attended", "absent"]).default("attended").notNull(),
+    recordedByUserId: int("recordedByUserId").references(() => users.id, { onDelete: "set null" }),
+    correctionReason: varchar("correctionReason", { length: 300 }),
+    checkedInAt: timestamp("checkedInAt").defaultNow().notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    uniqueIndex("event_checkins_event_user_unique").on(table.eventId, table.userId),
+    uniqueIndex("event_checkins_registration_unique").on(table.registrationId),
+    index("event_checkins_session_created_idx").on(table.sessionId, table.createdAt),
+    index("event_checkins_user_created_idx").on(table.userId, table.createdAt),
+  ]
+);
+
 export const announcements = mysqlTable(
   "announcements",
   {

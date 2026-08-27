@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { z } from "zod";
-import { auditLogs, eventRegistrations, events, memberships, membershipApplications, personalNotifications, projectAssignments, projects, resourceAccessLogs, resourceFavorites, resources, userPreferences, users } from "../../drizzle/schema";
+import { auditLogs, eventCheckIns, eventCheckInSessions, eventRegistrations, events, memberships, membershipApplications, personalNotifications, projectAssignments, projects, resourceAccessLogs, resourceFavorites, resources, userPreferences, users } from "../../drizzle/schema";
 import { hashPassword, verifyPassword } from "../club/passwords";
 import { getDb, getUserClubContext } from "../db";
 import { storagePut } from "../storage";
@@ -45,6 +45,7 @@ export const personalRouter = router({
     const clubContext = await getUserClubContext(userId);
     const assignedProjects = await db.select({ project: projects, assignment: projectAssignments }).from(projectAssignments).innerJoin(projects, eq(projectAssignments.projectId, projects.id)).where(and(eq(projectAssignments.userId, userId), eq(projectAssignments.status, "active"))).orderBy(desc(projects.updatedAt)).limit(5);
     const registrations = await db.select({ registration: eventRegistrations, event: events }).from(eventRegistrations).innerJoin(events, eq(eventRegistrations.eventId, events.id)).where(eq(eventRegistrations.userId, userId)).orderBy(desc(eventRegistrations.createdAt)).limit(5);
+    const checkInHistory = await db.select({ checkIn: eventCheckIns, event: { id: events.id, title: events.title, startsAt: events.startsAt, location: events.location }, session: { id: eventCheckInSessions.id, label: eventCheckInSessions.label } }).from(eventCheckIns).innerJoin(events, eq(eventCheckIns.eventId, events.id)).innerJoin(eventCheckInSessions, eq(eventCheckIns.sessionId, eventCheckInSessions.id)).where(eq(eventCheckIns.userId, userId)).orderBy(desc(eventCheckIns.checkedInAt)).limit(12);
     const rawResourceHistory = preferences?.resourceHistoryVisible === false ? [] : await db.select({ log: resourceAccessLogs, resource: { id: resources.id, title: resources.title, fileName: resources.fileName, visibility: resources.visibility, projectId: resources.projectId, mimeType: resources.mimeType } }).from(resourceAccessLogs).innerJoin(resources, eq(resourceAccessLogs.resourceId, resources.id)).where(eq(resourceAccessLogs.userId, userId)).orderBy(desc(resourceAccessLogs.createdAt)).limit(50);
     const resourceHistory = [] as typeof rawResourceHistory;
     for (const entry of rawResourceHistory) if (await canUserReadScopedResource(userId, entry.resource)) resourceHistory.push(entry);
@@ -54,7 +55,7 @@ export const personalRouter = router({
     const notifications = await db.select({ id: personalNotifications.id, title: personalNotifications.title, body: personalNotifications.body, href: personalNotifications.href, category: personalNotifications.category, readAt: personalNotifications.readAt, createdAt: personalNotifications.createdAt }).from(personalNotifications).where(and(eq(personalNotifications.userId, userId), isNull(personalNotifications.archivedAt))).orderBy(desc(personalNotifications.createdAt)).limit(12);
     const audits = await db.select({ id: auditLogs.id, actorUserId: auditLogs.actorUserId, action: auditLogs.action, targetType: auditLogs.targetType, targetId: auditLogs.targetId, createdAt: auditLogs.createdAt }).from(auditLogs).where(or(eq(auditLogs.actorUserId, userId), and(eq(auditLogs.targetType, "user"), eq(auditLogs.targetId, userId)))).orderBy(desc(auditLogs.createdAt)).limit(12);
     const applications = await db.select({ id: membershipApplications.id, status: membershipApplications.status, submittedAt: membershipApplications.submittedAt, updatedAt: membershipApplications.updatedAt }).from(membershipApplications).where(eq(membershipApplications.accountUserId, userId)).orderBy(desc(membershipApplications.updatedAt)).limit(3);
-    return { user, membership: clubContext?.membership ?? null, assignments: clubContext?.assignments ?? [], preferences: preferences ?? { reducedMotion: false, inAppNotifications: true, emailNotifications: false, resourceHistoryVisible: true }, projects: assignedProjects, registrations, resourceHistory: resourceHistory.slice(0, 12), favorites, notifications, auditSummary: audits.map(audit => ({ ...audit, source: audit.actorUserId === userId ? "self" as const : "governance" as const })), applications };
+    return { user, membership: clubContext?.membership ?? null, assignments: clubContext?.assignments ?? [], preferences: preferences ?? { reducedMotion: false, inAppNotifications: true, emailNotifications: false, resourceHistoryVisible: true }, projects: assignedProjects, registrations, checkInHistory, resourceHistory: resourceHistory.slice(0, 12), favorites, notifications, auditSummary: audits.map(audit => ({ ...audit, source: audit.actorUserId === userId ? "self" as const : "governance" as const })), applications };
   }),
   favoriteIds: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
