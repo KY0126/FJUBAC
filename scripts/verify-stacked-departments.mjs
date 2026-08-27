@@ -38,8 +38,22 @@ const initialCardMetrics = await initialFocus.evaluate(element => {
   const headingBox = heading.getBoundingClientRect();
   return { height: frameBox.height, titleTopGap: headingBox.top - frameBox.top };
 });
-if (initialCardMetrics.titleTopGap < 64 || initialCardMetrics.titleTopGap > 95) throw new Error(`焦點卡上框至部門名稱的間距應約為 2 公分，目前為 ${initialCardMetrics.titleTopGap.toFixed(1)}px。`);
+if (initialCardMetrics.titleTopGap < 55 || initialCardMetrics.titleTopGap > 70) throw new Error(`焦點卡上框至部門名稱的校正視覺間距應約為 2 公分，目前為 ${initialCardMetrics.titleTopGap.toFixed(1)}px。`);
 if (initialCardMetrics.height > 500) throw new Error(`焦點卡不應由固定最小高度拉長，目前高度為 ${initialCardMetrics.height.toFixed(1)}px。`);
+const allCardMetrics = await stack.locator(".site-department-card").evaluateAll(elements => elements.map(element => {
+  const heading = element.querySelector("h3");
+  const frameBox = element.getBoundingClientRect();
+  const headingBox = heading?.getBoundingClientRect();
+  return {
+    name: heading?.textContent?.trim(),
+    height: Number(frameBox.height.toFixed(1)),
+    titleTopGap: Number(((headingBox?.top ?? frameBox.top) - frameBox.top).toFixed(1)),
+    framePaddingTop: getComputedStyle(element).paddingTop,
+    buttonPaddingTop: getComputedStyle(element.querySelector(".site-department-card-select")).paddingTop,
+    titleMarginTop: getComputedStyle(heading).marginTop,
+  };
+}));
+if (allCardMetrics.some(metric => Math.abs(Number.parseFloat(metric.buttonPaddingTop) - 47.24) > .2)) throw new Error("五張卡片的標題頂部內距未一致套用校正後的視覺間距。");
 const initialAutoFocus = await activeDesktopCard().getAttribute("aria-label");
 await desktop.mouse.move(8, 8);
 await desktop.waitForTimeout(100);
