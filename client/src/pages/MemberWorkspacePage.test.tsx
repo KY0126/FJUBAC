@@ -26,7 +26,12 @@ vi.mock("@/lib/trpc", () => ({
       resources: {
         list: { useQuery: () => state.resources },
         download: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
+        open: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
       },
+    },
+    personal: {
+      favoriteIds: { useQuery: () => ({ data: [], refetch: vi.fn() }) },
+      setFavorite: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
     },
   },
 }));

@@ -1,7 +1,9 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export function PublicSiteHeader({ section }: { section: string }) {
+  const { isAuthenticated } = useAuth();
   return (
     <header className="site-subheader">
       <Link href="/" className="club-wordmark" aria-label="FJUBAC 首頁">
@@ -14,7 +16,7 @@ export function PublicSiteHeader({ section }: { section: string }) {
         <Link href="/links">資源</Link>
         <Link href="/departments">部門</Link>
         <Link href="/research">公開研究</Link>
-        <Link href="/account">社員登入</Link>
+        <Link href={isAuthenticated ? "/me" : "/account"}>{isAuthenticated ? "個人中心" : "社員登入"}</Link>
       </nav>
       <div className="site-subheader-actions"><span>{section}</span><Link href="/apply">加入 FJUBAC <ArrowRight size={14} /></Link></div>
     </header>

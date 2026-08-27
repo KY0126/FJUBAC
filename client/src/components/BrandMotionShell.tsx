@@ -4,7 +4,9 @@ import { useLocation } from "wouter";
 const EMBLEM_URL = "/manus-storage/fjubac-emblem-reference_4b3d690c.png";
 
 function prefersReducedMotion() {
-  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (typeof window === "undefined") return false;
+  try { if (localStorage.getItem("fjubac-user-reduced-motion") === "true") return true; } catch { /* ignore unavailable storage */ }
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 function isInternalNavigation(target: EventTarget | null) {

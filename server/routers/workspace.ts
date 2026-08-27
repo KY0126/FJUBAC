@@ -1,26 +1,15 @@
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
-import { auditLogs, departments, eventRegistrations, events, memberships, projectAssignments, projects, resources, users } from "../../drizzle/schema";
-import { getDb, getUserClubContext } from "../db";
+import { auditLogs, departments, eventRegistrations, events, memberships, projectAssignments, projects, resourceAccessLogs, resources, users } from "../../drizzle/schema";
+import { getDb } from "../db";
 import { storageGet, storagePut } from "../storage";
 import { projectManageProcedure, protectedProcedure, publicProcedure, resourceManageProcedure, router } from "../_core/trpc";
 import { hasPublicProjectConsent, hasPublicResourceConsent } from "../club/publicContentRules";
+import { canUserReadScopedResource } from "../club/resourceAccess";
 
 function assertDatabase<T>(database: T): asserts database is Exclude<T, null> {
   if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "資料服務暫時無法使用，請稍後再試。" });
-}
-
-async function canReadScopedItem(userId: number, item: { visibility: "public" | "member" | "project" | "officer"; projectId: number | null }) {
-  if (item.visibility === "public") return true;
-  const context = await getUserClubContext(userId);
-  if (item.visibility === "member") return context?.membership?.status === "active";
-  if (item.visibility === "officer") return (context?.permissionGroups.length ?? 0) > 0;
-  if (!item.projectId) return false;
-  const db = await getDb();
-  assertDatabase(db);
-  const [assignment] = await db.select({ id: projectAssignments.id }).from(projectAssignments).where(and(eq(projectAssignments.projectId, item.projectId), eq(projectAssignments.userId, userId), eq(projectAssignments.status, "active"))).limit(1);
-  return Boolean(assignment);
 }
 
 const projectInput = z.object({ title: z.string().trim().min(2).max(200), description: z.string().trim().max(5000).optional(), departmentId: z.number().int().positive().optional(), startsAt: z.date().optional(), endsAt: z.date().optional(), status: z.enum(["draft", "active", "completed", "archived", "cancelled"]), isPublic: z.boolean().default(false), publicSummary: z.string().trim().max(5000).optional(), confirmPublicConsent: z.boolean().default(false) });
@@ -93,16 +82,27 @@ export const workspaceRouter = router({
       assertDatabase(db);
       const all = await db.select().from(resources).orderBy(desc(resources.updatedAt));
       const permitted = [] as typeof all;
-      for (const item of all) if (await canReadScopedItem(ctx.user.id, item)) permitted.push(item);
+      for (const item of all) if (await canUserReadScopedResource(ctx.user.id, item)) permitted.push(item);
       return permitted.map(({ storageKey: _storageKey, ...item }) => item);
     }),
     download: protectedProcedure.input(z.object({ resourceId: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
       const db = await getDb();
       assertDatabase(db);
       const [resource] = await db.select().from(resources).where(eq(resources.id, input.resourceId)).limit(1);
-      if (!resource || !(await canReadScopedItem(ctx.user.id, resource))) throw new TRPCError({ code: "FORBIDDEN", message: "目前帳號沒有下載此資源的權限。" });
+      if (!resource || !(await canUserReadScopedResource(ctx.user.id, resource))) throw new TRPCError({ code: "FORBIDDEN", message: "目前帳號沒有下載此資源的權限。" });
       const { url } = await storageGet(resource.storageKey);
+      await db.insert(resourceAccessLogs).values({ userId: ctx.user.id, resourceId: resource.id, action: "download" });
       await db.insert(auditLogs).values({ actorUserId: ctx.user.id, action: "resource.download_requested", targetType: "resource", targetId: resource.id });
+      return { url, fileName: resource.fileName };
+    }),
+    open: protectedProcedure.input(z.object({ resourceId: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      assertDatabase(db);
+      const [resource] = await db.select().from(resources).where(eq(resources.id, input.resourceId)).limit(1);
+      if (!resource || !(await canUserReadScopedResource(ctx.user.id, resource))) throw new TRPCError({ code: "FORBIDDEN", message: "目前帳號沒有開啟此資源的權限。" });
+      const { url } = await storageGet(resource.storageKey);
+      await db.insert(resourceAccessLogs).values({ userId: ctx.user.id, resourceId: resource.id, action: "view" });
+      await db.insert(auditLogs).values({ actorUserId: ctx.user.id, action: "resource.open_requested", targetType: "resource", targetId: resource.id });
       return { url, fileName: resource.fileName };
     }),
     upload: resourceManageProcedure.input(resourceInput).mutation(async ({ ctx, input }) => {

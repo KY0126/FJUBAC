@@ -18,6 +18,7 @@ const LearningMapPage = lazy(() => import("./pages/LearningMapPage"));
 const PublicOutcomesPage = lazy(() => import("./pages/PublicOutcomesPage"));
 const DepartmentsPage = lazy(() => import("./pages/DepartmentsPage"));
 const AccountManagementPage = lazy(() => import("./pages/AccountManagementPage"));
+const PersonalCenterPage = lazy(() => import("./pages/PersonalCenterPage"));
 const MemberWorkspacePage = lazy(() => import("./pages/MemberWorkspacePage"));
 const ManagementWorkspacePage = lazy(() => import("./pages/ManagementWorkspacePage"));
 const ResearchArchive = lazy(() => import("./pages/ResearchArchive"));
@@ -33,6 +34,7 @@ function Router() {
       <Route path={"/recruitment"} component={RecruitmentPage} />
       <Route path={"/manage/recruitment"} component={RecruitmentManagement} />
       <Route path={"/account"} component={AccountAccessPage} />
+      <Route path={"/me"} component={PersonalCenterPage} />
       <Route path={"/announcements"} component={AnnouncementsPage} />
       <Route path={"/events"} component={EventsPage} />
       <Route path={"/links"} component={PublicLinksPage} />

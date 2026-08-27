@@ -31,6 +31,11 @@ export const users = mysqlTable(
     accountStatus: mysqlEnum("accountStatus", ["pending_activation", "active", "inactive"])
       .default("pending_activation")
       .notNull(),
+    avatarStorageKey: varchar("avatarStorageKey", { length: 500 }),
+    avatarUrl: varchar("avatarUrl", { length: 500 }),
+    grade: varchar("grade", { length: 80 }),
+    contact: varchar("contact", { length: 120 }),
+    lastPasswordChangedAt: timestamp("lastPasswordChangedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
     lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -332,6 +337,72 @@ export const resources = mysqlTable(
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   table => [index("resources_visibility_idx").on(table.visibility, table.projectId), index("resources_public_idx").on(table.visibility, table.publicConsentRecordedAt)]
+);
+
+export const userPreferences = mysqlTable(
+  "userPreferences",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reducedMotion: boolean("reducedMotion").default(false).notNull(),
+    inAppNotifications: boolean("inAppNotifications").default(true).notNull(),
+    emailNotifications: boolean("emailNotifications").default(false).notNull(),
+    resourceHistoryVisible: boolean("resourceHistoryVisible").default(true).notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [uniqueIndex("user_preferences_user_unique").on(table.userId)]
+);
+
+export const resourceAccessLogs = mysqlTable(
+  "resourceAccessLogs",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    resourceId: int("resourceId")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    action: mysqlEnum("action", ["view", "download"]).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("resource_access_logs_user_created_idx").on(table.userId, table.createdAt), index("resource_access_logs_resource_idx").on(table.resourceId, table.createdAt)]
+);
+
+export const resourceFavorites = mysqlTable(
+  "resourceFavorites",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    resourceId: int("resourceId")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [uniqueIndex("resource_favorites_user_resource_unique").on(table.userId, table.resourceId), index("resource_favorites_user_created_idx").on(table.userId, table.createdAt)]
+);
+
+export const personalNotifications = mysqlTable(
+  "personalNotifications",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    title: varchar("title", { length: 200 }).notNull(),
+    body: text("body"),
+    href: varchar("href", { length: 500 }),
+    category: mysqlEnum("category", ["system", "account", "activity", "project", "recruitment"]).default("system").notNull(),
+    readAt: timestamp("readAt"),
+    archivedAt: timestamp("archivedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("personal_notifications_user_active_idx").on(table.userId, table.archivedAt, table.createdAt)]
 );
 
 export const verificationCodes = mysqlTable(

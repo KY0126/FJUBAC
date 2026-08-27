@@ -29,6 +29,20 @@
       "when": 1787760728236,
       "tag": "0003_dizzy_micromacro",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1787790096173,
+      "tag": "0004_magical_hardball",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1787790593661,
+      "tag": "0005_dry_killmonger",
+      "breakpoints": true
     }
   ]
 }
