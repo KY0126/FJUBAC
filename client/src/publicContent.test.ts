@@ -119,4 +119,15 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(stylesheet).toContain("prefers-contrast:more");
     expect(departmentsPage).toContain("scrollIntoView({ block: \"start\" })");
   });
+
+  it("P1 排版與內容卡片互動維持流動閱讀與精細游標限定", () => {
+    const stylesheet = source("client/src/index.css");
+    expect(stylesheet).toContain("text-wrap:balance");
+    expect(stylesheet).toContain("text-wrap:pretty");
+    expect(stylesheet).toContain("max-inline-size:64ch");
+    expect(stylesheet).toContain("font-size:clamp(2.2rem,4.8vw,4.25rem)");
+    expect(stylesheet).toContain("@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference)");
+    expect(stylesheet).toContain("transform:translateY(-4px)");
+    expect(stylesheet).toContain("@media (hover:none), (pointer:coarse)");
+  });
 });
