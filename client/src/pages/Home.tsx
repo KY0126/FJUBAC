@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpenText, CalendarDays, ChevronRight, FileText, GraduationCap, Layers3, UsersRound } from "lucide-react";
+import { ArrowRight, BookOpenText, CalendarDays, ChevronRight, FileText, Layers3, UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -6,14 +6,7 @@ import { SiteOnboardingOverlay, SiteTourTrigger } from "@/components/SiteOnboard
 import { ONBOARDING_STORAGE_KEY, shouldShowOnboarding } from "@/lib/onboarding";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
-
-const departments = [
-  { number: "01", name: "人才發展部", en: "Talent Acquisition & Engagement", text: "規劃校內外招生、書審、面試與社員參與。", tone: "coral" },
-  { number: "02", name: "專案開發部", en: "Project Development & Management", text: "以專案實作串起分析學習、協作與成果交付。", tone: "ink" },
-  { number: "03", name: "對外發展部", en: "External Affairs", text: "串聯合作、對外活動與職涯交流機會。", tone: "moss" },
-  { number: "04", name: "學術營運部", en: "Academic Operations", text: "經營社課、教材、學術活動與知識資源。", tone: "blue" },
-  { number: "05", name: "行銷策略部", en: "Marketing Strategy", text: "傳遞社團故事、公開內容與活動資訊。", tone: "sand" },
-] as const;
+import { StackedDepartmentCards } from "@/components/StackedDepartmentCards";
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "即將發布";
@@ -90,7 +83,7 @@ export default function Home() {
 
         <section id="departments" className="site-section site-departments" aria-labelledby="departments-title">
           <header className="site-section-heading"><div><p className="site-eyebrow">ORGANIZATION</p><h2 id="departments-title">五個部門，一個共同目標</h2></div><p>每個部門都有清楚的工作責任與管理範圍，讓參與、合作與交接都有可依循的方式。</p></header>
-          <div className="site-department-grid">{departments.map(department => <article className={`site-department-card ${department.tone}`} key={department.number}><span>{department.number}</span><h3>{department.name}</h3><small>{department.en}</small><p>{department.text}</p></article>)}</div>
+          <StackedDepartmentCards />
         </section>
 
         <section className="site-join" aria-labelledby="join-title"><div><p className="site-eyebrow">JOIN FJUBAC</p><h2 id="join-title">準備好把學習，<br />帶進下一個現場了嗎？</h2><p>校內與校外申請者皆可依各自招生梯次提出申請；流程包含申請、書審、面試與帳號啟用。</p></div><div className="site-join-actions"><Link href="/apply" className="site-button light">查看招生資訊 <ArrowRight size={17} /></Link><Link href="/account" className="site-button outline-light">社員登入</Link></div></section>
