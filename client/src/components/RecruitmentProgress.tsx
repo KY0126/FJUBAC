@@ -9,5 +9,5 @@ const steps = [
 ];
 
 export function RecruitmentProgress() {
-  return <section className="recruitment-progress" aria-labelledby="recruitment-progress-title"><header><p className="club-section-number">APPLICATION JOURNEY</p><h2 id="recruitment-progress-title">申請流程</h2><p>每一梯次的實際截止時間與面試安排，以招生頁顯示資訊為準。</p></header><ol>{steps.map((step, index) => <li key={step.label}><span className="recruitment-progress-dot" aria-hidden="true"><step.Icon size={17} /></span><div><strong><small>{String(index + 1).padStart(2, "0")}</small>{step.label}</strong><p>{step.detail}</p></div></li>)}</ol></section>;
+  return <section id="recruitment-journey" className="recruitment-progress" aria-labelledby="recruitment-progress-title"><header><p className="club-section-number">APPLICATION JOURNEY</p><h2 id="recruitment-progress-title">申請流程</h2><p>每一梯次的實際截止時間與面試安排，以招生頁顯示資訊為準。</p></header><ol>{steps.map((step, index) => <li key={step.label}><span className="recruitment-progress-dot" aria-hidden="true"><step.Icon size={17} /></span><div><strong><small>{String(index + 1).padStart(2, "0")}</small>{step.label}</strong><p>{step.detail}</p></div></li>)}</ol></section>;
 }

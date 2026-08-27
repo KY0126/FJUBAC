@@ -155,7 +155,10 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(toc).toContain('aria-current={activeId === section.id ? "location" : undefined}');
     expect(toc).toContain("target.scrollIntoView");
     expect(toc).toContain("reachedPageEnd");
-    expect(toc).toContain('closest("details")?.removeAttribute("open")');
+    expect(toc).toContain("DESKTOP_TOC_COLLAPSED_STORAGE_KEY");
+    expect(toc).toContain("MOBILE_TOC_OPEN_STORAGE_KEY");
+    expect(toc).toContain("window.localStorage");
+    expect(toc).toContain('mobileDetails?.removeAttribute("open")');
     expect(toc).toContain("floating-toc-mobile");
     expect(home).toContain("id=\"join\"");
     expect(departments).toContain("departmentSections");
@@ -166,5 +169,11 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(links).toContain('id="public-resources"');
     expect(stylesheet).toContain(".floating-toc");
     expect(stylesheet).toContain("@media (max-width:1120px)");
+    expect(stylesheet).toContain('font-weight:800');
+    expect(stylesheet).toContain('border-left:4px solid #087bb7');
+    const recruitment = source("client/src/pages/RecruitmentPage.tsx");
+    expect(recruitment).toContain("recruitmentSections");
+    expect(recruitment).toContain("recruitment-cycle-selection");
+    expect(recruitment).toContain("recruitment-application-details");
   });
 });

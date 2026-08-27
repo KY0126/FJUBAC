@@ -7,5 +7,5 @@ const questions = [
 ];
 
 export function RecruitmentFaq() {
-  return <section className="recruitment-faq" aria-labelledby="recruitment-faq-title"><header><p className="club-section-number">FAQ</p><h2 id="recruitment-faq-title">招生常見問題</h2><p>先確認申請資格與流程；實際時程仍以各招生梯次頁面為準。</p></header><div>{questions.map((item, index) => <details key={item.question}><summary><span>{String(index + 1).padStart(2, "0")}</span>{item.question}</summary><p>{item.answer}</p></details>)}</div></section>;
+  return <section id="recruitment-faq" className="recruitment-faq" aria-labelledby="recruitment-faq-title"><header><p className="club-section-number">FAQ</p><h2 id="recruitment-faq-title">招生常見問題</h2><p>先確認申請資格與流程；實際時程仍以各招生梯次頁面為準。</p></header><div>{questions.map((item, index) => <details key={item.question}><summary><span>{String(index + 1).padStart(2, "0")}</span>{item.question}</summary><p>{item.answer}</p></details>)}</div></section>;
 }

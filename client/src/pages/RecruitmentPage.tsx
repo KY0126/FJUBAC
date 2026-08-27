@@ -7,6 +7,7 @@ import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 import { RecruitmentFaq } from "@/pages/RecruitmentFaq";
 import { RecruitmentProgress } from "@/components/RecruitmentProgress";
 import { departmentGrowthContent } from "@/lib/departmentGrowthContent";
+import { FloatingTableOfContents } from "@/components/FloatingTableOfContents";
 
 type ApplicantType = "internal" | "external";
 
@@ -19,6 +20,7 @@ export default function RecruitmentPage() {
 
   const availableCycles = useMemo(() => cycles?.filter(cycle => cycle.audienceType === applicantType) ?? [], [applicantType, cycles]);
   const selectedCycle = availableCycles.find(cycle => cycle.id === cycleId) ?? availableCycles[0] ?? null;
+  const recruitmentSections = useMemo(() => [{ id: "recruitment-journey", label: "申請流程" }, { id: "recruitment-department-insights", label: "認識五部門" }, { id: "recruitment-cycle-selection", label: "選擇招生梯次" }, ...(selectedCycle ? [{ id: "recruitment-application-details", label: "填寫申請資料" }] : []), { id: "recruitment-faq", label: "常見問題" }], [selectedCycle]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,10 +46,11 @@ export default function RecruitmentPage() {
   return (
     <main className="recruitment-shell">
       <PublicSiteHeader section="RECRUITMENT PORTAL" />
+      <FloatingTableOfContents sections={recruitmentSections} />
       <section className="recruitment-intro"><div><p className="club-section-number">JOIN FJUBAC</p><h1>從一份申請，<br /><em>開始下一段實作。</em></h1><p>請依你的身份選擇校內或校外招生梯次。每一梯次都有獨立的申請說明、書審與面試時程；最終核准後，才能以 Email 認證碼啟用帳號。</p></div><FileText className="recruitment-intro-icon" aria-hidden="true" /></section>
       <section className="recruitment-content">
         <RecruitmentProgress />
-        <div className="audience-toggle" role="tablist" aria-label="選擇招生梯次">
+        <div id="recruitment-cycle-selection" className="audience-toggle" role="tablist" aria-label="選擇招生梯次">
           <button role="tab" aria-selected={applicantType === "internal"} onClick={() => { setApplicantType("internal"); setCycleId(null); }}>校內申請者</button>
           <button role="tab" aria-selected={applicantType === "external"} onClick={() => { setApplicantType("external"); setCycleId(null); }}>校外申請者</button>
         </div>
@@ -58,7 +61,7 @@ export default function RecruitmentPage() {
         {isLoading ? <div className="recruitment-state"><Loader2 className="animate-spin" />正在讀取招生梯次…</div> : !selectedCycle ? (
           <div className="recruitment-state empty"><Clock3 /><div><strong>目前沒有開放的{applicantType === "internal" ? "校內" : "校外"}招生梯次。</strong><p>請留意 FJUBAC 公開公告，或在下一個梯次開放後再回到本頁申請。</p></div></div>
         ) : (
-          <form onSubmit={submit} className="application-form">
+          <form id="recruitment-application-details" onSubmit={submit} className="application-form">
             <div className="cycle-panel"><p className="club-section-number">OPEN CYCLE</p><h2>{selectedCycle.title}</h2><p>{selectedCycle.description}</p><dl><div><dt>書審截止</dt><dd>{new Date(selectedCycle.documentDeadlineAt).toLocaleString("zh-TW")}</dd></div>{selectedCycle.interviewStartsAt && <div><dt>面試開始</dt><dd>{new Date(selectedCycle.interviewStartsAt).toLocaleString("zh-TW")}</dd></div>}</dl>{availableCycles.length > 1 && <select value={selectedCycle.id} onChange={event => setCycleId(Number(event.target.value))}>{availableCycles.map(cycle => <option value={cycle.id} key={cycle.id}>{cycle.title}</option>)}</select>}</div>
             <div className="application-fields"><div className="form-heading"><UsersRound /><div><h2>填寫申請資料</h2><p>僅蒐集書審、面試與聯絡所需資訊。申請資料僅供人才發展部授權審核者與社長使用。</p></div></div>{submitApplication.error && <p className="form-error"><AlertCircle />{submitApplication.error.message}</p>}<div className="form-grid"><label>姓名<input name="applicantName" required maxLength={120} /></label><label>系級／年級<input name="grade" required maxLength={80} placeholder="例：企管三甲／大三" /></label>{applicantType === "internal" ? <><label>學號<input name="studentNumber" required maxLength={32} /></label><label>學校信箱<input name="schoolEmail" type="email" required maxLength={320} /></label></> : <label className="full">Email<input name="externalEmail" type="email" required maxLength={320} /></label>}<label className="full">聯絡方式<input name="contact" required maxLength={120} placeholder="例：手機、LINE ID 或其他可聯絡方式" /></label><label className="full">申請原因<textarea name="motivation" required minLength={20} maxLength={5000} rows={7} placeholder="請說明你希望在 FJUBAC 學習、實作或探索的方向。" /></label></div><button type="submit" className="club-primary" disabled={submitApplication.isPending}>{submitApplication.isPending ? "送出中…" : "送出申請資料"}</button></div>
           </form>
