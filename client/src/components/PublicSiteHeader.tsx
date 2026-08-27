@@ -1,24 +1,50 @@
-import { ArrowRight } from "lucide-react";
-import { Link } from "wouter";
+import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
+import { type ReactNode, useState } from "react";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 
-export function PublicSiteHeader({ section }: { section: string }) {
+export function PublicSiteHeader({ section, utilityAction }: { section: string; utilityAction?: ReactNode }) {
   const { isAuthenticated } = useAuth();
+  const [location] = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isCurrent = (...paths: string[]) => paths.includes(location);
+  const linkClass = (...paths: string[]) => `public-nav-link${isCurrent(...paths) ? " is-current" : ""}`;
+  const closeMenu = () => setIsMenuOpen(false);
   return (
     <header className="site-subheader">
       <Link href="/" className="club-wordmark" aria-label="FJUBAC 首頁">
         <img className="club-emblem" src="/manus-storage/fjubac-emblem-reference_4b3d690c.png" alt="" />
         <span><strong>FJUBAC</strong><small>FJU BUSINESS ANALYTICS CLUB</small></span>
       </Link>
-      <nav aria-label="公開服務導覽">
-        <Link href="/announcements">公告</Link>
-        <Link href="/events">活動</Link>
-        <Link href="/links">資源</Link>
-        <Link href="/departments">部門</Link>
-        <Link href="/research">公開研究</Link>
-        <Link href={isAuthenticated ? "/me" : "/account"}>{isAuthenticated ? "個人中心" : "社員登入"}</Link>
+      <button className="public-nav-toggle" type="button" aria-label={isMenuOpen ? "關閉導覽選單" : "開啟導覽選單"} aria-expanded={isMenuOpen} aria-controls="public-navigation" onClick={() => setIsMenuOpen(open => !open)}>{isMenuOpen ? <X size={20} /> : <Menu size={20} />}</button>
+      <nav id="public-navigation" className={`public-nav${isMenuOpen ? " is-open" : ""}`} aria-label="公開服務導覽">
+        <div className="public-nav-cluster public-nav-cluster-public">
+          <span className="public-nav-cluster-label">公開資訊</span>
+          <Link href="/announcements" onClick={closeMenu} className={linkClass("/announcements")} aria-current={isCurrent("/announcements") ? "page" : undefined}>最新資訊</Link>
+          <Link href="/events" onClick={closeMenu} className={linkClass("/events")} aria-current={isCurrent("/events") ? "page" : undefined}>活動</Link>
+          <details className="public-nav-dropdown">
+            <summary className={linkClass("/departments")} aria-current={isCurrent("/departments") ? "page" : undefined}>社團介紹 <ChevronDown size={14} /></summary>
+            <div className="public-nav-dropdown-menu">
+              <Link href="/departments" onClick={closeMenu} className={linkClass("/departments")} aria-current={isCurrent("/departments") ? "page" : undefined}>五部門</Link>
+              <Link href="/links" onClick={closeMenu} className={linkClass("/links")} aria-current={isCurrent("/links") ? "page" : undefined}>公開連結與資源</Link>
+            </div>
+          </details>
+          <details className="public-nav-dropdown">
+            <summary className={linkClass("/learning", "/outcomes", "/research")} aria-current={isCurrent("/learning", "/outcomes", "/research") ? "page" : undefined}>探索 FJUBAC <ChevronDown size={14} /></summary>
+            <div className="public-nav-dropdown-menu">
+              <Link href="/learning" onClick={closeMenu} className={linkClass("/learning")} aria-current={isCurrent("/learning") ? "page" : undefined}>學習地圖</Link>
+              <Link href="/outcomes" onClick={closeMenu} className={linkClass("/outcomes")} aria-current={isCurrent("/outcomes") ? "page" : undefined}>公開成果</Link>
+              <Link href="/research" onClick={closeMenu} className={linkClass("/research")} aria-current={isCurrent("/research") ? "page" : undefined}>公開研究檔案</Link>
+            </div>
+          </details>
+        </div>
+        <div className="public-nav-cluster public-nav-cluster-member">
+          <span className="public-nav-cluster-label">社員服務</span>
+          <Link href={isAuthenticated ? "/me" : "/account"} onClick={closeMenu} className={linkClass(isAuthenticated ? "/me" : "/account")} aria-current={isCurrent(isAuthenticated ? "/me" : "/account") ? "page" : undefined}>{isAuthenticated ? "個人中心" : "社員登入"}</Link>
+          {isAuthenticated && <Link href="/workspace" onClick={closeMenu} className={linkClass("/workspace")} aria-current={isCurrent("/workspace") ? "page" : undefined}>社員工作區</Link>}
+        </div>
       </nav>
-      <div className="site-subheader-actions"><span>{section}</span><Link href="/apply">加入 FJUBAC <ArrowRight size={14} /></Link></div>
+      <div className="site-subheader-actions"><span className="site-current-section">{section}</span>{utilityAction}<Link href="/apply" aria-current={isCurrent("/apply") ? "page" : undefined}>我要申請 <ArrowRight size={14} /></Link></div>
     </header>
   );
 }

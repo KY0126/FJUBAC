@@ -26,10 +26,26 @@ describe("FJUBAC 校徽藍色品牌系統", () => {
     const home = source("client/src/pages/Home.tsx");
     const publicHeader = source("client/src/components/PublicSiteHeader.tsx");
     const css = source("client/src/blue-brand.css");
-    expect(home).toContain('fjubac-emblem-reference_4b3d690c.png');
+    expect(home).toContain("PublicSiteHeader");
     expect(publicHeader).toContain('fjubac-emblem-reference_4b3d690c.png');
     expect(css).toContain('.club-emblem { width:50px;');
     expect(css).toContain('.club-emblem { width:40px;');
+  });
+
+  it("公開導覽列收斂主選單並提供內容分組、目前頁與行動版分區", () => {
+    const home = source("client/src/pages/Home.tsx");
+    const publicHeader = source("client/src/components/PublicSiteHeader.tsx");
+    const css = source("client/src/blue-brand.css");
+    expect(home).toContain("<PublicSiteHeader");
+    expect(publicHeader).toContain("最新資訊");
+    expect(publicHeader).toContain("社團介紹");
+    expect(publicHeader).toContain("探索 FJUBAC");
+    expect(publicHeader).toContain("公開資訊");
+    expect(publicHeader).toContain("社員服務");
+    expect(publicHeader).toContain('aria-current={isCurrent("/announcements") ? "page" : undefined}');
+    expect(publicHeader).toContain("我要申請");
+    expect(css).toContain(".public-nav-toggle");
+    expect(css).toContain(".public-nav-cluster-label");
   });
 
   it("深藍主要按鈕固定使用白色文字，避免繼承周圍深色文字", () => {

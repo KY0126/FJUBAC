@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { SiteOnboardingOverlay, SiteTourTrigger } from "@/components/SiteOnboardingOverlay";
 import { ONBOARDING_STORAGE_KEY, shouldShowOnboarding } from "@/lib/onboarding";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
+import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 
 const departments = [
   { number: "01", name: "人才發展部", en: "Talent Acquisition & Engagement", text: "規劃校內外招生、書審、面試與社員參與。", tone: "coral" },
@@ -44,22 +45,7 @@ export default function Home() {
   return (
     <div className="site-home">
       <SiteOnboardingOverlay open={isOnboardingOpen} onClose={closeOnboarding} />
-      <header className="site-header">
-        <Link href="/" className="club-wordmark" aria-label="FJUBAC 首頁">
-          <img className="club-emblem" src="/manus-storage/fjubac-emblem-reference_4b3d690c.png" alt="" />
-          <span><strong>FJUBAC</strong><small>FJU BUSINESS ANALYTICS CLUB</small></span>
-        </Link>
-        <nav aria-label="主要導覽" className="site-nav">
-          <a href="#about">關於我們</a>
-          <a href="#updates">最新資訊</a>
-          <a href="#departments">組織與部門</a>
-          <Link href="/announcements">公告</Link>
-          <Link href="/events">活動</Link>
-          <Link href="/research">公開研究</Link>
-        </nav>
-        <SiteTourTrigger onOpen={() => setIsOnboardingOpen(true)} />
-        <Link href="/apply" className="site-header-cta">加入 FJUBAC <ArrowRight size={15} /></Link>
-      </header>
+      <PublicSiteHeader section="首頁" utilityAction={<SiteTourTrigger onOpen={() => setIsOnboardingOpen(true)} />} />
 
       <main>
         <section className="site-hero" aria-labelledby="home-title">
