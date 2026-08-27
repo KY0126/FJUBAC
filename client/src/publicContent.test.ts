@@ -144,4 +144,27 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(stylesheet).toContain(".reading-back-to-top");
     expect(stylesheet).toContain("P2: reading orientation and low-contrast FJUBAC data texture");
   });
+
+  it("長篇公開頁提供浮動章節目錄、實際錨點與目前段落標示", () => {
+    const toc = source("client/src/components/FloatingTableOfContents.tsx");
+    const home = source("client/src/pages/Home.tsx");
+    const departments = source("client/src/pages/DepartmentsPage.tsx");
+    const learning = source("client/src/pages/LearningMapPage.tsx");
+    const links = source("client/src/pages/PublicLinksPage.tsx");
+    const stylesheet = source("client/src/index.css");
+    expect(toc).toContain('aria-current={activeId === section.id ? "location" : undefined}');
+    expect(toc).toContain("target.scrollIntoView");
+    expect(toc).toContain("reachedPageEnd");
+    expect(toc).toContain('closest("details")?.removeAttribute("open")');
+    expect(toc).toContain("floating-toc-mobile");
+    expect(home).toContain("id=\"join\"");
+    expect(departments).toContain("departmentSections");
+    expect(departments).toContain("trackScroll={false}");
+    expect(learning).toContain("learning-stage-${step}");
+    expect(learning).toContain("trackScroll={false}");
+    expect(links).toContain('id="official-links"');
+    expect(links).toContain('id="public-resources"');
+    expect(stylesheet).toContain(".floating-toc");
+    expect(stylesheet).toContain("@media (max-width:1120px)");
+  });
 });

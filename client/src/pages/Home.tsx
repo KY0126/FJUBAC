@@ -7,6 +7,7 @@ import { ONBOARDING_STORAGE_KEY, shouldShowOnboarding } from "@/lib/onboarding";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { StackedDepartmentCards } from "@/components/StackedDepartmentCards";
+import { FloatingTableOfContents } from "@/components/FloatingTableOfContents";
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "即將發布";
@@ -39,6 +40,7 @@ export default function Home() {
     <div className="site-home">
       <SiteOnboardingOverlay open={isOnboardingOpen} onClose={closeOnboarding} />
       <PublicSiteHeader section="首頁" utilityAction={<SiteTourTrigger onOpen={() => setIsOnboardingOpen(true)} />} />
+      <FloatingTableOfContents sections={[{ id: "updates", label: "最新資訊" }, { id: "about", label: "認識 FJUBAC" }, { id: "departments", label: "五部門" }, { id: "join", label: "加入我們" }]} />
 
       <main>
         <section className="site-hero" aria-labelledby="home-title">
@@ -86,7 +88,7 @@ export default function Home() {
           <StackedDepartmentCards />
         </section>
 
-        <section className="site-join" aria-labelledby="join-title"><div><p className="site-eyebrow">JOIN FJUBAC</p><h2 id="join-title">準備好把學習，<br />帶進下一個現場了嗎？</h2><p>校內與校外申請者皆可依各自招生梯次提出申請；流程包含申請、書審、面試與帳號啟用。</p></div><div className="site-join-actions"><Link href="/apply" className="site-button light">查看招生資訊 <ArrowRight size={17} /></Link><Link href="/account" className="site-button outline-light">社員登入</Link></div></section>
+        <section id="join" className="site-join" aria-labelledby="join-title"><div><p className="site-eyebrow">JOIN FJUBAC</p><h2 id="join-title">準備好把學習，<br />帶進下一個現場了嗎？</h2><p>校內與校外申請者皆可依各自招生梯次提出申請；流程包含申請、書審、面試與帳號啟用。</p></div><div className="site-join-actions"><Link href="/apply" className="site-button light">查看招生資訊 <ArrowRight size={17} /></Link><Link href="/account" className="site-button outline-light">社員登入</Link></div></section>
 
         <section className="site-archive-note"><BookOpenText size={22} /><div><strong>公開內容研究檔案</strong><p>想先了解 FJUBAC 的公開內容脈絡、主題與索引，可前往獨立研究頁瀏覽。</p></div><Link href="/research">開啟研究檔案 <ArrowRight size={15} /></Link></section>
       </main>
