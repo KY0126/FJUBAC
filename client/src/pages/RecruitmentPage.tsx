@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, Clock3, FileText, Loader2, UsersRound } from "lucide-react";
+import { AlertCircle, BadgeCheck, CheckCircle2, Clock3, FileText, GraduationCap, Loader2, Sparkles, UsersRound } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -6,6 +6,7 @@ import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 import { RecruitmentFaq } from "@/pages/RecruitmentFaq";
 import { RecruitmentProgress } from "@/components/RecruitmentProgress";
+import { departmentGrowthContent } from "@/lib/departmentGrowthContent";
 
 type ApplicantType = "internal" | "external";
 
@@ -50,6 +51,10 @@ export default function RecruitmentPage() {
           <button role="tab" aria-selected={applicantType === "internal"} onClick={() => { setApplicantType("internal"); setCycleId(null); }}>校內申請者</button>
           <button role="tab" aria-selected={applicantType === "external"} onClick={() => { setApplicantType("external"); setCycleId(null); }}>校外申請者</button>
         </div>
+        <section className="recruitment-department-insights" aria-labelledby="recruitment-department-insights-title">
+          <header><p className="club-section-number">FIVE DEPARTMENTS</p><h2 id="recruitment-department-insights-title"><Sparkles size={22} aria-hidden="true" />認識你可能投入的方向</h2><p>以下整理各部門已公開的學習點與加分項目，協助你在送出申請前理解不同方向；加分項目用於自我評估，並不代表申請門檻。</p></header>
+          <div className="recruitment-department-grid">{Object.entries(departmentGrowthContent).map(([departmentName, content]) => <article key={departmentName} className="recruitment-department-card"><h3>{departmentName}</h3><div className="department-growth-grid"><section className="department-growth-list" aria-label={`${departmentName}學習點`}><h4><GraduationCap size={17} aria-hidden="true" />學習點</h4><ul>{content.learningPoints.map(item => <li key={item}>{item}</li>)}</ul></section><section className="department-growth-list" aria-label={`${departmentName}加分項目`}><h4><BadgeCheck size={17} aria-hidden="true" />加分項目</h4><ul>{content.bonusItems.map(item => <li key={item}>{item}</li>)}</ul></section></div></article>)}</div>
+        </section>
         {isLoading ? <div className="recruitment-state"><Loader2 className="animate-spin" />正在讀取招生梯次…</div> : !selectedCycle ? (
           <div className="recruitment-state empty"><Clock3 /><div><strong>目前沒有開放的{applicantType === "internal" ? "校內" : "校外"}招生梯次。</strong><p>請留意 FJUBAC 公開公告，或在下一個梯次開放後再回到本頁申請。</p></div></div>
         ) : (

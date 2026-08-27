@@ -90,16 +90,21 @@ describe("公開頁尾與招生 FAQ", () => {
 
   it("五部門介紹頁呈現使用者確認的學習點與加分項目", () => {
     const departmentsPage = source("client/src/pages/DepartmentsPage.tsx");
-    expect(departmentsPage).toContain("社群經營及行銷數據分析實戰力");
-    expect(departmentsPage).toContain("熟悉 Canva 操作使用");
-    expect(departmentsPage).toContain("專業書信撰寫、往來能力");
-    expect(departmentsPage).toContain("富有統整能力、快速理解能力");
-    expect(departmentsPage).toContain("面試、書審設計");
-    expect(departmentsPage).toContain("活動舉辦與籌備經驗");
-    expect(departmentsPage).toContain("對外關係建立、陌生合作關係開發");
-    expect(departmentsPage).toContain("曾擔任過本社「專案生」");
-    expect(departmentsPage).toContain("品牌打造與形象經營");
-    expect(departmentsPage).toContain("撰寫合作企劃書、活動企劃書經驗");
+    const recruitmentPage = source("client/src/pages/RecruitmentPage.tsx");
+    const growthContent = source("client/src/lib/departmentGrowthContent.ts");
+    expect(departmentsPage).toContain('from "@/lib/departmentGrowthContent"');
+    expect(recruitmentPage).toContain('from "@/lib/departmentGrowthContent"');
+    expect(recruitmentPage).toContain("加分項目用於自我評估，並不代表申請門檻");
+    expect(growthContent).toContain("社群經營及行銷數據分析實戰力");
+    expect(growthContent).toContain("熟悉 Canva 操作使用");
+    expect(growthContent).toContain("專業書信撰寫、往來能力");
+    expect(growthContent).toContain("富有統整能力、快速理解能力");
+    expect(growthContent).toContain("面試、書審設計");
+    expect(growthContent).toContain("活動舉辦與籌備經驗");
+    expect(growthContent).toContain("對外關係建立、陌生合作關係開發");
+    expect(growthContent).toContain("曾擔任過本社「專案生」");
+    expect(growthContent).toContain("品牌打造與形象經營");
+    expect(growthContent).toContain("撰寫合作企劃書、活動企劃書經驗");
     expect(departmentsPage).toContain('title="學習點"');
     expect(departmentsPage).toContain('title="加分項目"');
   });
