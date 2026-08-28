@@ -23,4 +23,11 @@ describe("專案流程與職涯地圖前端契約", () => {
     expect(detailPage).toContain("退回原因（退回時必填）");
     expect(detailPage).toContain("已鎖定");
   });
+
+  it("職涯地圖沿用社課教學紀錄的三欄圖文卡片骨架", () => {
+    expect(learningPage).toContain("teaching-record-grid learning-map-card-grid");
+    expect(learningPage).toContain("teaching-record-card");
+    expect(learningPage).toContain("teaching-card-visual learning-map-card-visual");
+    expect(learningPage).toContain("teaching-card-body");
+  });
 });
