@@ -36,4 +36,9 @@ describe("專案流程與職涯地圖前端契約", () => {
     expect(learningPage).toContain("personal.setFavorite");
     expect(learningPage).toContain("已收藏");
   });
+
+  it("以社團活動作為使用者可見名稱", () => {
+    expect(learningPage).toContain("<h1>社團活動</h1>");
+    expect(learningPage).not.toContain("學習與職涯地圖");
+  });
 });

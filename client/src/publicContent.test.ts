@@ -166,7 +166,7 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(home).not.toContain("FloatingTableOfContents");
     expect(departments).toContain("departmentSections");
     expect(departments).toContain("trackScroll={false}");
-    expect(learning).toContain("學習與職涯地圖");
+    expect(learning).toContain("社團活動");
     expect(learning).toContain("learningCareerMap.list");
     expect(learning).toContain("refetchInterval: 15_000");
     expect(links).toContain('id="official-links"');

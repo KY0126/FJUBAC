@@ -15,7 +15,7 @@ const SECTION_BY_PATH: Record<string, string> = {
   "/announcements": "PUBLIC BULLETIN",
   "/events": "EVENTS & PARTICIPATION",
   "/links": "LINKS & RESOURCES",
-  "/learning": "LEARNING MAP",
+  "/learning": "社團活動",
   "/outcomes": "PUBLIC OUTCOMES",
   "/departments": "FIVE DEPARTMENTS",
   "/workspace": "個人中心／工作區",

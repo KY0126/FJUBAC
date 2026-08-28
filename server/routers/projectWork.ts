@@ -43,7 +43,7 @@ async function requireCurriculumManager(user: { id: number; role: "user" | "admi
   if (user.role === "admin") return;
   const clubContext = await getUserClubContext(user.id);
   if (!canUsePermission({ isPresident: false, permissionGroups: clubContext?.permissionGroups ?? [] }, PERMISSION_GROUPS.projectManageDepartment)) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "只有具專案管理權限的專案開發部幹部可管理學習與職涯地圖。" });
+    throw new TRPCError({ code: "FORBIDDEN", message: "只有具專案管理權限的專案開發部幹部可管理社團活動。" });
   }
 }
 
@@ -194,7 +194,7 @@ export const projectWorkRouter = router({
   }),
   learningCareerMap: router({
     list: protectedProcedure.input(z.object({ category: careerCategorySchema.optional() }).optional()).query(async ({ ctx, input }) => {
-      if (!(await hasWorkflowDirectoryAccess(ctx.user))) throw new TRPCError({ code: "FORBIDDEN", message: "僅限有效專案生或具專案管理權限的幹部查看學習與職涯地圖。" });
+      if (!(await hasWorkflowDirectoryAccess(ctx.user))) throw new TRPCError({ code: "FORBIDDEN", message: "僅限有效專案生或具專案管理權限的幹部查看社團活動。" });
       const db = await getDb(); assertDatabase(db);
       const rows = await db.select({ mapping: learningCareerResourceMappings, resource: resources }).from(learningCareerResourceMappings).innerJoin(resources, eq(learningCareerResourceMappings.resourceId, resources.id)).where(input?.category ? eq(learningCareerResourceMappings.category, input.category) : undefined).orderBy(asc(learningCareerResourceMappings.category), asc(learningCareerResourceMappings.displayOrder));
       const readable = []; for (const row of rows) if (await canUserReadScopedResource(ctx.user.id, row.resource)) readable.push(row); return readable;
