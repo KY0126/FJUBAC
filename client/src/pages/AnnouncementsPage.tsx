@@ -1,35 +1,22 @@
-import { Bell, CalendarDays, FileText, ImageOff } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
+import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { Reveal } from "@/components/Reveal";
+import { Bell, FileText, Filter, ImageOff, Search, X } from "lucide-react";
+import "../activity-search.css";
 
-const CATEGORIES = [
-  { value: "all", label: "全部" },
-  { value: "general", label: "一般公告" },
-  { value: "recruitment", label: "招生" },
-  { value: "event", label: "活動" },
-  { value: "academic", label: "學術" },
-  { value: "external", label: "對外" },
-  { value: "governance", label: "治理" },
-] as const;
+const CATEGORIES=[{value:"all",label:"全部"},{value:"general",label:"一般公告"},{value:"recruitment",label:"招生"},{value:"event",label:"活動"},{value:"academic",label:"學術"},{value:"external",label:"對外"},{value:"governance",label:"治理"}] as const;
+const CATEGORY_LABELS=Object.fromEntries(CATEGORIES.map(({value,label})=>[value,label]));
+const formatDate=(value:Date|string|null)=>value?new Date(value).toLocaleDateString("zh-TW",{year:"numeric",month:"short",day:"numeric"}):"未發布";
+function AnnouncementSkeletons(){return <div className="announcement-list announcement-card-grid activity-skeleton-grid" aria-live="polite" aria-label="正在更新公告結果">{Array.from({length:6},(_,i)=><div className="activity-result-skeleton" key={i}><span/><i/><b/><em/><small/></div>)}</div>}
 
-const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map(({ value, label }) => [value, label]));
-
-function formatDate(value: Date | string | null) {
-  if (!value) return "未發布";
-  return new Date(value).toLocaleDateString("zh-TW", { year: "numeric", month: "short", day: "numeric" });
-}
-
-export default function AnnouncementsPage() {
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]["value"]>("all");
-  const queryInput = useMemo(() => category === "all" ? undefined : { category }, [category]);
-  const announcements = trpc.content.announcements.publicList.useQuery(queryInput);
-  const content = announcements.isLoading ? <div className="service-empty">正在整理公告…</div>
-    : announcements.isError ? <div className="service-empty"><FileText size={28} /><h2>暫時無法載入公告。</h2><p>{announcements.error.message || "請稍後重新整理頁面，或改從首頁進入其他服務。"}</p><button className="club-primary" onClick={() => announcements.refetch()}>重新載入</button></div>
-      : announcements.data?.length ? <div className="announcement-list announcement-card-grid">{announcements.data.map(item => <article className="announcement-card announcement-card-rich" key={item.id}>{item.coverImageUrl ? <img className="announcement-cover" src={item.coverImageUrl} alt="" /> : <div className="announcement-cover announcement-cover-empty" aria-hidden="true"><ImageOff size={24} /></div>}<div className="announcement-card-body"><div><span className="status-chip">{CATEGORY_LABELS[item.category] || "一般公告"}</span><time>{formatDate(item.publishedAt)}</time></div><h2>{item.title}</h2><p>{item.excerpt || item.content.slice(0, 160)}</p><footer><FileText size={15} />由 FJUBAC 授權單位發布</footer></div></article>)}</div>
-        : <div className="service-empty"><FileText size={28} /><h2>目前沒有{category === "all" ? "已發布的公開公告" : `${CATEGORY_LABELS[category]}公告`}。</h2><p>後續的招生、活動與對外資訊會由各部門依權限發布。</p><Link href="/apply" className="club-primary">查看招生資訊</Link></div>;
-  return <main className="service-shell"><PublicSiteHeader section="PUBLIC BULLETIN" /><section className="service-hero"><p className="club-section-number">PUBLIC INFORMATION</p><h1>公告與資訊</h1><p>招生、活動與對外訊息將由授權部門持續更新。僅顯示已發布且設定為公開的內容。</p></section><section className="service-content"><div className="service-ledger"><Bell /><div><strong>公開範圍</strong><span>可依公告類別查詢社團已正式發布的訊息。</span></div></div><Reveal><div className="announcement-filter" role="tablist" aria-label="公告分類">{CATEGORIES.map(item => <button type="button" key={item.value} role="tab" aria-selected={category === item.value} className={category === item.value ? "is-active" : ""} onClick={() => setCategory(item.value)}>{item.label}</button>)}</div>{content}</Reveal></section><footer className="service-footer"><CalendarDays size={15} />需要活動資訊？請前往 <Link href="/events">活動頁</Link>。</footer><PublicSiteFooter /></main>;
+export default function AnnouncementsPage(){
+ const [keyword,setKeyword]=useState(""),[category,setCategory]=useState<(typeof CATEGORIES)[number]["value"]>("all"),[startDate,setStartDate]=useState(""),[endDate,setEndDate]=useState(""),[advanced,setAdvanced]=useState(false);
+ const queryInput=useMemo(()=>({category:category==="all"?undefined:category,keyword:keyword.trim()||undefined,startDate:startDate||undefined,endDate:endDate||undefined}),[keyword,category,startDate,endDate]);
+ const announcements=trpc.content.announcements.publicList.useQuery(queryInput);
+ const clear=()=>{setKeyword("");setCategory("all");setStartDate("");setEndDate("")};
+ const loading=announcements.isLoading||announcements.isFetching;
+ return <main className="service-shell announcements-search-page"><PublicSiteHeader section="PUBLIC BULLETIN"/><section className="service-hero"><p className="club-section-number">PUBLIC INFORMATION</p><h1>最新資訊</h1><p>搜尋已發布且設定為公開的公告。可依關鍵字、分類與發布日期組合篩選，結果會即時更新。</p></section><section className="service-content"><div className="service-ledger"><Bell/><div><strong>公開範圍</strong><span>只顯示授權單位正式發布的公開公告。</span></div></div><Reveal><div className="teaching-filter-panel announcement-search-panel"><div className="teaching-search-row"><div className="teaching-search"><Search size={18}/><label className="sr-only" htmlFor="announcement-search">搜尋最新資訊</label><input id="announcement-search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="搜尋公告名稱、摘要或內容"/></div><button type="button" className="activity-advanced-toggle" aria-expanded={advanced} aria-controls="announcement-advanced-filters" onClick={()=>setAdvanced(open=>!open)}><Filter size={16}/>進階篩選</button></div>{advanced&&<div id="announcement-advanced-filters" className="activity-advanced-panel"><div className="teaching-select-row"><label>分類<select value={category} onChange={e=>setCategory(e.target.value as typeof category)}>{CATEGORIES.map(item=><option key={item.value} value={item.value}>{item.value==="all"?"全部類別":item.label}</option>)}</select></label><label>開始日期<input type="date" value={startDate} max={endDate||undefined} onChange={e=>setStartDate(e.target.value)}/></label><label>結束日期<input type="date" value={endDate} min={startDate||undefined} onChange={e=>setEndDate(e.target.value)}/></label></div><button type="button" className="activity-clear-filters" onClick={clear}><X size={16}/>清除所有條件</button></div>}</div>{loading?<AnnouncementSkeletons/>:announcements.isError?<div className="service-empty"><FileText size={28}/><h2>暫時無法載入公告。</h2><p>{announcements.error.message||"請稍後重新整理頁面，或改從首頁進入其他服務。"}</p><button className="club-primary" onClick={()=>announcements.refetch()}>重新載入</button></div>:announcements.data?.length?<div className="announcement-list announcement-card-grid">{announcements.data.map(item=><article className="announcement-card announcement-card-rich" key={item.id}>{item.coverImageUrl?<img className="announcement-cover" src={item.coverImageUrl} alt=""/>:<div className="announcement-cover announcement-cover-empty" aria-hidden="true"><ImageOff size={24}/></div>}<div className="announcement-card-body"><div><span className="status-chip">{CATEGORY_LABELS[item.category]||"一般公告"}</span><time>{formatDate(item.publishedAt)}</time></div><h2>{item.title}</h2><p>{item.excerpt||item.content.slice(0,160)}</p><footer><FileText size={15}/>由 FJUBAC 授權單位發布</footer></div></article>)}</div>:<div className="service-empty"><FileText size={28}/><h2>找不到符合條件的公開公告。</h2><p>請調整搜尋文字、分類或發布日期，或清除全部條件後重新查看。</p><button type="button" className="club-primary" onClick={clear}>清除所有條件</button></div>}</Reveal></section><footer className="service-footer">需要更多社團內容？可從導覽列探索社團活動與社課教學紀錄。</footer><PublicSiteFooter/></main>;
 }

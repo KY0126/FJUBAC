@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const baseUrl = process.env.BASE_URL || "http://127.0.0.1:3000";
-const routes = ["/", "/apply", "/account", "/announcements", "/events", "/links", "/learning", "/outcomes", "/departments", "/research", "/workspace", "/me", "/manage/workspace", "/manage/recruitment", "/manage/project-content", "/manage/accounts", "/404"];
+const routes = ["/", "/apply", "/account", "/announcements", "/learning", "/outcomes", "/departments", "/research", "/workspace", "/me", "/manage/workspace", "/manage/recruitment", "/manage/project-content", "/manage/accounts", "/404"];
 const viewports = [{ name: "桌機", width: 1440, height: 900 }, { name: "平板", width: 768, height: 1024 }, { name: "手機", width: 390, height: 844 }];
 const browser = await chromium.launch({ executablePath: "/usr/bin/chromium", headless: true, args: ["--no-sandbox"] });
 
@@ -23,7 +23,7 @@ for (const viewport of viewports) {
       const persistentLoadingMessages = ["正在載入頁面…", "正在整理你的個人中心…"].filter(message => visibleText.includes(message));
       const horizontalOverflow = document.documentElement.scrollWidth > window.innerWidth + 1;
       const textClips = [...document.querySelectorAll("h1,h2,h3,h4,p,a,button,label,summary,strong,small,li")]
-        .filter(element => element instanceof HTMLElement && element.offsetParent !== null)
+        .filter(element => element instanceof HTMLElement && element.offsetParent !== null && !element.classList.contains("sr-only"))
         .filter(element => {
           const computed = style(element);
           const hidesOverflow = ["hidden", "clip"].includes(computed.overflowX) || ["hidden", "clip"].includes(computed.overflowY);
@@ -55,4 +55,4 @@ for (const viewport of viewports) {
 }
 
 await browser.close();
-console.log("全頁面呈現驗收通過：17 條路由於桌機、平板、手機均完成載入，均有唯一共用頁首頁尾與回到頂部控制，且未見水平溢出、疑似文字裁切或固定控制超出視窗。 ");
+console.log("全頁面呈現驗收通過：15 條路由於桌機、平板、手機均完成載入，均有唯一共用頁首頁尾與回到頂部控制，且未見水平溢出、疑似文字裁切或固定控制超出視窗。 ");

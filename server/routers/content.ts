@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, gte, inArray, lte, or } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, like, lte, or } from "drizzle-orm";
 import { z } from "zod";
 import { announcements, auditLogs, departments, eventRegistrations, events, projectAssignments, siteDisplaySettings, users } from "../../drizzle/schema";
 import { getDb, getUserClubContext } from "../db";
@@ -84,12 +84,15 @@ export const contentRouter = router({
     }),
   }),
   announcements: router({
-    publicList: publicProcedure.input(z.object({ category: z.enum(["general", "recruitment", "event", "academic", "external", "governance"]).optional() }).optional()).query(async ({ input }) => {
+    publicList: publicProcedure.input(z.object({ category: z.enum(["general", "recruitment", "event", "academic", "external", "governance"]).optional(), keyword: z.string().trim().max(200).optional(), startDate: z.coerce.date().optional(), endDate: z.coerce.date().optional() }).optional()).query(async ({ input }) => {
       const db = await getDb();
       if (!db) return [];
       const conditions = [eq(announcements.status, "published"), eq(announcements.visibility, "public")];
       if (input?.category) conditions.push(eq(announcements.category, input.category));
-      return db.select().from(announcements).where(and(...conditions)).orderBy(desc(announcements.publishedAt)).limit(24);
+      if (input?.keyword) { const keyword = `%${input.keyword}%`; conditions.push(or(like(announcements.title, keyword), like(announcements.excerpt, keyword), like(announcements.content, keyword))!); }
+      if (input?.startDate) conditions.push(gte(announcements.publishedAt, input.startDate));
+      if (input?.endDate) { const inclusiveEnd = new Date(input.endDate); inclusiveEnd.setUTCHours(23, 59, 59, 999); conditions.push(lte(announcements.publishedAt, inclusiveEnd)); }
+      return db.select().from(announcements).where(and(...conditions)).orderBy(desc(announcements.publishedAt)).limit(80);
     }),
     create: contentManageProcedure.input(announcementInput).mutation(async ({ ctx, input }) => {
       const db = await getDb();

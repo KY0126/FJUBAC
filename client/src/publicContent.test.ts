@@ -24,10 +24,8 @@ describe("公開頁尾與招生 FAQ", () => {
   });
 
   it("公開內容頁保留同意與無資料原則，不以範例成果補足空白", () => {
-    const links = source("client/src/pages/PublicLinksPage.tsx");
     const outcomes = source("client/src/pages/PublicOutcomesPage.tsx");
     const learning = source("client/src/pages/LearningMapPage.tsx");
-    expect(links).toContain("已完成公開同意紀錄");
     expect(outcomes).toContain("合作過的企業");
     expect(outcomes).toContain("目前尚未提供可公開刊登的合作企業資料");
     expect(learning).toContain("系統不會建立或展示虛構題庫");
@@ -37,7 +35,8 @@ describe("公開頁尾與招生 FAQ", () => {
     const app = source("client/src/App.tsx");
     const reveal = source("client/src/components/Reveal.tsx");
     const styles = source("client/src/index.css");
-    expect(app).toContain('path={"/links"}');
+    expect(app).not.toContain('path={"/links"}');
+    expect(app).not.toContain('path={"/events"}');
     expect(app).toContain('path={"/learning"}');
     expect(app).toContain('path={"/outcomes"}');
     expect(app).toContain('path={"/departments"}');
@@ -152,7 +151,6 @@ describe("公開頁尾與招生 FAQ", () => {
     const home = source("client/src/pages/Home.tsx");
     const departments = source("client/src/pages/DepartmentsPage.tsx");
     const learning = source("client/src/pages/LearningMapPage.tsx");
-    const links = source("client/src/pages/PublicLinksPage.tsx");
     const stylesheet = source("client/src/index.css");
     expect(toc).toContain('aria-current={activeId === section.id ? "location" : undefined}');
     expect(toc).toContain("target.scrollIntoView");
@@ -168,9 +166,7 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(departments).toContain("trackScroll={false}");
     expect(learning).toContain("社團活動");
     expect(learning).toContain("learningCareerMap.list");
-    expect(learning).toContain("refetchInterval: 15_000");
-    expect(links).toContain('id="official-links"');
-    expect(links).toContain('id="public-resources"');
+    expect(learning).toContain("refetchInterval:15_000");
     expect(stylesheet).toContain(".floating-toc");
     expect(stylesheet).toContain("@media (max-width:1120px)");
     expect(stylesheet).toContain('font-weight:800');
@@ -217,6 +213,19 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(research).toContain("selectedYear");
     expect(research).toContain("keyword");
     expect(research).toContain("teaching-record-card");
+  });
+
+  it("最新資訊提供公開公告的進階搜尋、日期篩選與載入骨架屏", () => {
+    const announcements = source("client/src/pages/AnnouncementsPage.tsx");
+    const contentRouter = source("server/routers/content.ts");
+    expect(announcements).toContain("進階篩選");
+    expect(announcements).toContain("announcement-advanced-filters");
+    expect(announcements).toContain('type="date"');
+    expect(announcements).toContain("清除所有條件");
+    expect(announcements).toContain("AnnouncementSkeletons");
+    expect(contentRouter).toContain("keyword: z.string().trim().max(200).optional()");
+    expect(contentRouter).toContain("startDate: z.coerce.date().optional()");
+    expect(contentRouter).toContain("like(announcements.title, keyword)");
   });
 
   it("研究檔案索引的公開標題不使用省略號裁切", () => {

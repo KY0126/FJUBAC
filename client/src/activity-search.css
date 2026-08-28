@@ -1,0 +1,14 @@
+.activity-sort-select { display:grid; flex:0 0 auto; gap:4px; color:#28557a; font:700 12px "Noto Sans TC",sans-serif; }
+.activity-sort-select select { min-height:44px; max-width:188px; border:1px solid #8bbad8; border-radius:0; background:#fff; color:#1f4a82; padding:8px 28px 8px 10px; font:700 13px "Noto Sans TC",sans-serif; }
+.activity-sort-select select:focus-visible { outline:3px solid rgba(8,123,183,.28); outline-offset:2px; }
+.activity-skeleton-grid { min-height:330px; }
+.activity-result-skeleton { min-height:318px; overflow:hidden; border:1px solid #d0e0eb; background:#fff; box-shadow:0 12px 28px rgba(33,77,110,.08); }
+.activity-result-skeleton::before { content:""; display:block; height:118px; background:linear-gradient(145deg,#1d6d9f,#97c9e0); }
+.activity-result-skeleton > * { display:block; height:14px; margin:18px 22px; border-radius:2px; background:linear-gradient(90deg,#e6f0f6 20%,#f7fbfd 38%,#e6f0f6 56%); background-size:240% 100%; animation:activity-skeleton-shimmer 1.25s linear infinite; }
+.activity-result-skeleton > i { width:34%; margin-top:26px; }
+.activity-result-skeleton > b { width:76%; height:22px; }
+.activity-result-skeleton > em { width:90%; }
+.activity-result-skeleton > small { width:54%; }
+@keyframes activity-skeleton-shimmer { to { background-position:-240% 0; } }
+@media (max-width:720px) { .activity-sort-select { width:100%; }.activity-sort-select select { max-width:none; width:100%; }.activity-result-skeleton { min-height:292px; } }
+@media (prefers-reduced-motion:reduce) { .activity-result-skeleton > * { animation:none; } }

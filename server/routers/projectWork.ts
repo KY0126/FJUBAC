@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { auditLogs, learningCareerResourceMappings, personalNotifications, projectAssignments, projectDeliverables, projectMilestones, projectStageDocuments, projects, projectTasks, projectWorkflowStates, projectWorkflowTransitions, resources, users } from "../../drizzle/schema";
+import { auditLogs, learningCareerResourceMappings, personalNotifications, projectAssignments, projectDeliverables, projectMilestones, projectStageDocuments, projects, projectTasks, projectWorkflowStates, projectWorkflowTransitions, resourceAccessLogs, resources, users } from "../../drizzle/schema";
 import { getDb, getUserClubContext } from "../db";
 import { canUsePermission, PERMISSION_GROUPS } from "../club/permissions";
 import { canUserReadScopedResource } from "../club/resourceAccess";
@@ -193,11 +193,16 @@ export const projectWorkRouter = router({
     }),
   }),
   learningCareerMap: router({
-    list: protectedProcedure.input(z.object({ category: careerCategorySchema.optional() }).optional()).query(async ({ ctx, input }) => {
+    list: protectedProcedure.input(z.object({ category: careerCategorySchema.optional(), keyword: z.string().trim().max(200).optional(), startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), schoolYear: z.string().regex(/^\d{1,3}$/).optional(), semester: z.enum(["第一學期", "第二學期"]).optional(), sortBy: z.enum(["recent", "popular"]).default("recent") }).optional()).query(async ({ ctx, input }) => {
       if (!(await hasWorkflowDirectoryAccess(ctx.user))) throw new TRPCError({ code: "FORBIDDEN", message: "僅限有效專案生或具專案管理權限的幹部查看社團活動。" });
       const db = await getDb(); assertDatabase(db);
       const rows = await db.select({ mapping: learningCareerResourceMappings, resource: resources }).from(learningCareerResourceMappings).innerJoin(resources, eq(learningCareerResourceMappings.resourceId, resources.id)).where(input?.category ? eq(learningCareerResourceMappings.category, input.category) : undefined).orderBy(asc(learningCareerResourceMappings.category), asc(learningCareerResourceMappings.displayOrder));
-      const readable = []; for (const row of rows) if (await canUserReadScopedResource(ctx.user.id, row.resource)) readable.push(row); return readable;
+      const readable = []; for (const row of rows) if (await canUserReadScopedResource(ctx.user.id, row.resource)) readable.push(row);
+      const resourceIds = readable.map(row => row.resource.id);
+      const accessRows = resourceIds.length ? await db.select({ resourceId: resourceAccessLogs.resourceId }).from(resourceAccessLogs).where(inArray(resourceAccessLogs.resourceId, resourceIds)) : [];
+      const popularity = new Map<number, number>(); for (const row of accessRows) popularity.set(row.resourceId, (popularity.get(row.resourceId) ?? 0) + 1);
+      const filtered = readable.filter(row => { const date = row.resource.createdAt; const dateKey = date.toISOString().slice(0, 10); const calendarYear = date.getFullYear(); const academicYear = String((date.getMonth() >= 8 ? calendarYear : calendarYear - 1) - 1911); const semester = date.getMonth() >= 8 || date.getMonth() <= 0 ? "第一學期" : "第二學期"; const haystack = `${row.resource.title} ${row.resource.description ?? ""} ${row.resource.fileName}`.toLocaleLowerCase(); return (!input?.keyword || haystack.includes(input.keyword.toLocaleLowerCase())) && (!input?.startDate || dateKey >= input.startDate) && (!input?.endDate || dateKey <= input.endDate) && (!input?.schoolYear || academicYear === input.schoolYear) && (!input?.semester || semester === input.semester); });
+      return filtered.map(row => ({ ...row, popularity: popularity.get(row.resource.id) ?? 0 })).sort((left, right) => input?.sortBy === "popular" ? right.popularity - left.popularity || right.resource.createdAt.getTime() - left.resource.createdAt.getTime() : right.resource.createdAt.getTime() - left.resource.createdAt.getTime());
     }),
     mapResource: protectedProcedure.input(z.object({ resourceId: z.number().int().positive(), category: careerCategorySchema, displayOrder: z.number().int().min(0).max(10000).default(0) })).mutation(async ({ ctx, input }) => {
       await requireCurriculumManager(ctx.user); const db = await getDb(); assertDatabase(db);

@@ -26,14 +26,7 @@ export function PublicSiteHeader({ section, utilityAction, global = false }: { s
       <div className="public-nav-cluster public-nav-cluster-public">
         <span className="public-nav-cluster-label">公開資訊</span>
         <Link href="/announcements" onClick={closeMenu} className={linkClass("/announcements")} aria-current={isCurrent("/announcements") ? "page" : undefined}>最新資訊</Link>
-        <Link href="/events" onClick={closeMenu} className={linkClass("/events")} aria-current={isCurrent("/events") ? "page" : undefined}>活動</Link>
-        <details className="public-nav-dropdown">
-          <summary className={linkClass("/departments")} aria-current={isCurrent("/departments") ? "page" : undefined}>社團介紹 <ChevronDown size={14} /></summary>
-          <div className="public-nav-dropdown-menu">
-            <Link href="/departments" onClick={closeMenu} className={linkClass("/departments")} aria-current={isCurrent("/departments") ? "page" : undefined}>五部門</Link>
-            <Link href="/links" onClick={closeMenu} className={linkClass("/links")} aria-current={isCurrent("/links") ? "page" : undefined}>公開連結與資源</Link>
-          </div>
-        </details>
+        <Link href="/departments" onClick={closeMenu} className={linkClass("/departments")} aria-current={isCurrent("/departments") ? "page" : undefined}>社團介紹</Link>
         <details className="public-nav-dropdown">
           <summary className={linkClass("/learning", "/outcomes", "/research")} aria-current={isCurrent("/learning", "/outcomes", "/research") ? "page" : undefined}>探索 FJUBAC <ChevronDown size={14} /></summary>
           <div className="public-nav-dropdown-menu">

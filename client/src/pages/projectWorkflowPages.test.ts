@@ -9,7 +9,7 @@ describe("專案流程與社團活動前端契約", () => {
   it("列表、詳情與社團活動皆以 15 秒輪詢同步", () => {
     expect(listPage).toContain("refetchInterval: 15_000");
     expect(detailPage).toContain("refetchInterval: 15_000");
-    expect(learningPage).toContain("refetchInterval: 15_000");
+    expect(learningPage).toContain("refetchInterval:15_000");
   });
 
   it("未登入與無權限使用者不會取得敏感頁面內容", () => {
@@ -48,7 +48,7 @@ describe("專案流程與社團活動前端契約", () => {
     expect(learningPage).toContain("請先選擇學年");
     expect(learningPage).toContain("第一學期");
     expect(learningPage).toContain("第二學期");
-    expect(learningPage).toContain("<Tags size={15} />類別");
+    expect(learningPage).toContain("<Tags size={15}/>類別");
     expect(learningPage).toContain("schoolYearFor(resource.createdAt)");
     expect(learningPage).toContain("semesterFor(resource.createdAt)");
   });
@@ -60,12 +60,23 @@ describe("專案流程與社團活動前端契約", () => {
     expect(learningPage).toContain("startDate");
     expect(learningPage).toContain("endDate");
     expect(learningPage).toContain("清除所有條件");
-    expect(learningPage).toContain("clearFilters");
+    expect(learningPage).toContain("const clear=");
   });
 
   it("收藏操作具有可移除的愛心微動畫狀態", () => {
-    expect(learningPage).toContain("pulsingFavoriteId");
+    expect(learningPage).toContain("pulsingId");
     expect(learningPage).toContain("is-pulsing");
     expect(learningPage).toContain("onAnimationEnd");
+  });
+
+  it("社團活動以真實存取紀錄提供熱門排序並在更新時顯示骨架屏", () => {
+    const workflowRouter = readFileSync(new URL("../../../server/routers/projectWork.ts", import.meta.url), "utf8");
+    expect(learningPage).toContain("排序方式");
+    expect(learningPage).toContain("熱門程度");
+    expect(learningPage).toContain("ResultSkeletons");
+    expect(learningPage).toContain("query.isFetching");
+    expect(workflowRouter).toContain("resourceAccessLogs");
+    expect(workflowRouter).toContain("popularity");
+    expect(workflowRouter).toContain('sortBy === "popular"');
   });
 });
