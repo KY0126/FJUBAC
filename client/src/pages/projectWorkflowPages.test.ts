@@ -22,6 +22,8 @@ describe("專案流程與職涯地圖前端契約", () => {
     expect(detailPage).toContain("project-workflow-stepper");
     expect(detailPage).toContain("退回原因（退回時必填）");
     expect(detailPage).toContain("已鎖定");
+    expect(detailPage).toContain("匯出該階段所有文件");
+    expect(detailPage).toContain("exportStageDocuments");
   });
 
   it("職涯地圖沿用社課教學紀錄的三欄圖文卡片骨架", () => {
@@ -29,5 +31,9 @@ describe("專案流程與職涯地圖前端契約", () => {
     expect(learningPage).toContain("teaching-record-card");
     expect(learningPage).toContain("teaching-card-visual learning-map-card-visual");
     expect(learningPage).toContain("teaching-card-body");
+    expect(learningPage).toContain("service-shell teaching-records-page");
+    expect(learningPage).toContain("personal.favoriteIds");
+    expect(learningPage).toContain("personal.setFavorite");
+    expect(learningPage).toContain("已收藏");
   });
 });

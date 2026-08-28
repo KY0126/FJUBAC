@@ -6,6 +6,7 @@ import { getDb, getUserClubContext } from "../db";
 import { canUsePermission, PERMISSION_GROUPS } from "../club/permissions";
 import { canUserReadScopedResource } from "../club/resourceAccess";
 import { protectedProcedure, router } from "../_core/trpc";
+import { storageGet } from "../storage";
 
 function assertDatabase<T>(database: T): asserts database is Exclude<T, null> {
   if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "資料服務暫時無法使用，請稍後再試。" });
@@ -151,6 +152,14 @@ export const projectWorkRouter = router({
       await db.insert(auditLogs).values({ actorUserId: ctx.user.id, action: direction === "forward" ? "project.workflow_advanced" : "project.workflow_rolled_back", targetType: "project", targetId: input.projectId, beforeData: { stage: state.currentStage }, afterData: { stage: input.toStage, reason: input.reason ?? null } });
       await notifyActiveProjectMembers(input.projectId, `${project.title}：流程${direction === "forward" ? "前進" : "退回"}`, `目前階段為「${PROJECT_WORKFLOW_STAGES[toIndex].title}」。${input.reason ? `退回原因：${input.reason}` : ""}`);
       return { currentStage: input.toStage, direction };
+    }),
+    exportStageDocuments: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), stage: workflowStageSchema })).mutation(async ({ ctx, input }) => {
+      const access = await getProjectAccess(ctx.user, input.projectId);
+      const db = await getDb(); assertDatabase(db);
+      const rows = await db.select({ document: projectStageDocuments, resource: { id: resources.id, title: resources.title, fileName: resources.fileName, storageKey: resources.storageKey } }).from(projectStageDocuments).innerJoin(resources, eq(projectStageDocuments.resourceId, resources.id)).where(and(eq(projectStageDocuments.projectId, input.projectId), eq(projectStageDocuments.stage, input.stage), eq(projectStageDocuments.status, "active")));
+      const files = await Promise.all(rows.filter(row => Boolean(row.resource.storageKey)).map(async row => ({ documentId: row.document.id, title: row.document.title, fileName: row.resource.fileName, url: (await storageGet(row.resource.storageKey!)).url })));
+      await db.insert(auditLogs).values({ actorUserId: ctx.user.id, action: "project.workflow_stage_documents_exported", targetType: "project", targetId: input.projectId, afterData: { stage: input.stage, documentCount: files.length, managerAccess: access.canManage } });
+      return { files };
     }),
     documents: router({
       create: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), stage: workflowStageSchema, resourceId: z.number().int().positive().optional(), deliverableId: z.number().int().positive().optional(), title: z.string().trim().min(2).max(200), summary: z.string().trim().max(5000).optional() })).mutation(async ({ ctx, input }) => {

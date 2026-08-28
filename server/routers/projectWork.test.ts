@@ -43,6 +43,14 @@ describe("MVP-2 專案工作資料範圍", () => {
     expect(source).not.toContain("delete(projectStageDocuments)");
   });
 
+  it("階段文件匯出仍受專案存取與文件鎖定規則保護", () => {
+    expect(source).toContain("exportStageDocuments: protectedProcedure");
+    expect(source).toContain("await getProjectAccess(ctx.user, input.projectId)");
+    expect(source).toContain('eq(projectStageDocuments.status, "active")');
+    expect(source).toContain("project.workflow_stage_documents_exported");
+    expect(source).toContain("storageGet(row.resource.storageKey!)");
+  });
+
   it("職涯地圖僅允許有效專案生或具明確專案管理權限者讀取", () => {
     expect(source).toContain("hasWorkflowDirectoryAccess");
     expect(source).toContain("learningCareerMap");
