@@ -52,4 +52,20 @@ describe("專案流程與社團活動前端契約", () => {
     expect(learningPage).toContain("schoolYearFor(resource.createdAt)");
     expect(learningPage).toContain("semesterFor(resource.createdAt)");
   });
+
+  it("社團活動提供可展開的進階篩選與清除控制", () => {
+    expect(learningPage).toContain("進階篩選");
+    expect(learningPage).toContain("activity-advanced-filters");
+    expect(learningPage).toContain('type="date"');
+    expect(learningPage).toContain("startDate");
+    expect(learningPage).toContain("endDate");
+    expect(learningPage).toContain("清除所有條件");
+    expect(learningPage).toContain("clearFilters");
+  });
+
+  it("收藏操作具有可移除的愛心微動畫狀態", () => {
+    expect(learningPage).toContain("pulsingFavoriteId");
+    expect(learningPage).toContain("is-pulsing");
+    expect(learningPage).toContain("onAnimationEnd");
+  });
 });
