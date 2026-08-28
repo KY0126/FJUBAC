@@ -48,7 +48,8 @@ describe("MVP-2 專案工作資料範圍", () => {
     expect(source).toContain("await getProjectAccess(ctx.user, input.projectId)");
     expect(source).toContain('eq(projectStageDocuments.status, "active")');
     expect(source).toContain("project.workflow_stage_documents_exported");
-    expect(source).toContain("storageGet(row.resource.storageKey!)");
+    expect(source).toContain("canUserReadScopedResource(ctx.user.id, row.resource)");
+    expect(source).toContain("storageGet(row.resource.storageKey)");
   });
 
   it("職涯地圖僅允許有效專案生或具明確專案管理權限者讀取", () => {

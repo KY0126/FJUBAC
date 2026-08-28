@@ -156,8 +156,9 @@ export const projectWorkRouter = router({
     exportStageDocuments: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), stage: workflowStageSchema })).mutation(async ({ ctx, input }) => {
       const access = await getProjectAccess(ctx.user, input.projectId);
       const db = await getDb(); assertDatabase(db);
-      const rows = await db.select({ document: projectStageDocuments, resource: { id: resources.id, title: resources.title, fileName: resources.fileName, storageKey: resources.storageKey } }).from(projectStageDocuments).innerJoin(resources, eq(projectStageDocuments.resourceId, resources.id)).where(and(eq(projectStageDocuments.projectId, input.projectId), eq(projectStageDocuments.stage, input.stage), eq(projectStageDocuments.status, "active")));
-      const files = await Promise.all(rows.filter(row => Boolean(row.resource.storageKey)).map(async row => ({ documentId: row.document.id, title: row.document.title, fileName: row.resource.fileName, url: (await storageGet(row.resource.storageKey!)).url })));
+      const rows = await db.select({ document: projectStageDocuments, resource: { id: resources.id, title: resources.title, fileName: resources.fileName, storageKey: resources.storageKey, visibility: resources.visibility, projectId: resources.projectId } }).from(projectStageDocuments).innerJoin(resources, eq(projectStageDocuments.resourceId, resources.id)).where(and(eq(projectStageDocuments.projectId, input.projectId), eq(projectStageDocuments.stage, input.stage), eq(projectStageDocuments.status, "active")));
+      const readableRows = []; for (const row of rows) if (row.resource.storageKey && await canUserReadScopedResource(ctx.user.id, row.resource)) readableRows.push(row);
+      const files = await Promise.all(readableRows.map(async row => ({ documentId: row.document.id, title: row.document.title, fileName: row.resource.fileName, url: (await storageGet(row.resource.storageKey)).url })));
       await db.insert(auditLogs).values({ actorUserId: ctx.user.id, action: "project.workflow_stage_documents_exported", targetType: "project", targetId: input.projectId, afterData: { stage: input.stage, documentCount: files.length, managerAccess: access.canManage } });
       return { files };
     }),
