@@ -5,8 +5,8 @@ const listPage = readFileSync(new URL("./ProjectListPage.tsx", import.meta.url),
 const detailPage = readFileSync(new URL("./ProjectDetailPage.tsx", import.meta.url), "utf8");
 const learningPage = readFileSync(new URL("./LearningMapPage.tsx", import.meta.url), "utf8");
 
-describe("專案流程與職涯地圖前端契約", () => {
-  it("列表、詳情與職涯地圖皆以 15 秒輪詢同步", () => {
+describe("專案流程與社團活動前端契約", () => {
+  it("列表、詳情與社團活動皆以 15 秒輪詢同步", () => {
     expect(listPage).toContain("refetchInterval: 15_000");
     expect(detailPage).toContain("refetchInterval: 15_000");
     expect(learningPage).toContain("refetchInterval: 15_000");
@@ -26,7 +26,7 @@ describe("專案流程與職涯地圖前端契約", () => {
     expect(detailPage).toContain("exportStageDocuments");
   });
 
-  it("職涯地圖沿用社課教學紀錄的三欄圖文卡片骨架", () => {
+  it("社團活動沿用社課教學紀錄的三欄圖文卡片骨架", () => {
     expect(learningPage).toContain("teaching-record-grid learning-map-card-grid");
     expect(learningPage).toContain("teaching-record-card");
     expect(learningPage).toContain("teaching-card-visual learning-map-card-visual");
@@ -40,5 +40,16 @@ describe("專案流程與職涯地圖前端契約", () => {
   it("以社團活動作為使用者可見名稱", () => {
     expect(learningPage).toContain("<h1>社團活動</h1>");
     expect(learningPage).not.toContain("學習與職涯地圖");
+  });
+
+  it("社團活動依搜尋、學年、學期與類別標籤篩選真實資源", () => {
+    expect(learningPage).toContain("activity-search");
+    expect(learningPage).toContain("學年度");
+    expect(learningPage).toContain("請先選擇學年");
+    expect(learningPage).toContain("第一學期");
+    expect(learningPage).toContain("第二學期");
+    expect(learningPage).toContain("<Tags size={15} />類別");
+    expect(learningPage).toContain("schoolYearFor(resource.createdAt)");
+    expect(learningPage).toContain("semesterFor(resource.createdAt)");
   });
 });
