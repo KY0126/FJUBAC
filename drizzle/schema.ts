@@ -470,6 +470,66 @@ export const projectDeliverables = mysqlTable(
   table => [index("project_deliverables_project_status_idx").on(table.projectId, table.status), index("project_deliverables_task_idx").on(table.taskId), index("project_deliverables_resource_idx").on(table.resourceId)]
 );
 
+export const projectWorkflowStates = mysqlTable(
+  "projectWorkflowStates",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    currentStage: mysqlEnum("currentStage", ["methodology", "framing", "industry", "qualitative", "quantitative", "synthesis", "mvp", "impact"]).default("methodology").notNull(),
+    updatedByUserId: int("updatedByUserId").references(() => users.id, { onDelete: "set null" }),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [uniqueIndex("project_workflow_states_project_unique").on(table.projectId)]
+);
+
+export const projectWorkflowTransitions = mysqlTable(
+  "projectWorkflowTransitions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    fromStage: mysqlEnum("fromStage", ["methodology", "framing", "industry", "qualitative", "quantitative", "synthesis", "mvp", "impact"]),
+    toStage: mysqlEnum("toStage", ["methodology", "framing", "industry", "qualitative", "quantitative", "synthesis", "mvp", "impact"]).notNull(),
+    direction: mysqlEnum("direction", ["forward", "rollback"]).notNull(),
+    reason: varchar("reason", { length: 500 }),
+    changedByUserId: int("changedByUserId").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => [index("project_workflow_transitions_project_created_idx").on(table.projectId, table.createdAt)]
+);
+
+export const projectStageDocuments = mysqlTable(
+  "projectStageDocuments",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    projectId: int("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    stage: mysqlEnum("stage", ["methodology", "framing", "industry", "qualitative", "quantitative", "synthesis", "mvp", "impact"]).notNull(),
+    resourceId: int("resourceId").references(() => resources.id, { onDelete: "set null" }),
+    deliverableId: int("deliverableId").references(() => projectDeliverables.id, { onDelete: "set null" }),
+    title: varchar("title", { length: 200 }).notNull(),
+    summary: text("summary"),
+    status: mysqlEnum("status", ["active", "locked", "archived"]).default("active").notNull(),
+    createdByUserId: int("createdByUserId").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [index("project_stage_documents_project_stage_idx").on(table.projectId, table.stage, table.status)]
+);
+
+export const learningCareerResourceMappings = mysqlTable(
+  "learningCareerResourceMappings",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    resourceId: int("resourceId").notNull().references(() => resources.id, { onDelete: "cascade" }),
+    category: mysqlEnum("category", ["club_activities", "workshops", "corporate_visits", "career_preparation"]).notNull(),
+    displayOrder: int("displayOrder").default(0).notNull(),
+    createdByUserId: int("createdByUserId").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [uniqueIndex("learning_career_resource_unique").on(table.resourceId), index("learning_career_resource_category_order_idx").on(table.category, table.displayOrder)]
+);
+
 export const userPreferences = mysqlTable(
   "userPreferences",
   {

@@ -28,9 +28,9 @@ describe("公開頁尾與招生 FAQ", () => {
     const outcomes = source("client/src/pages/PublicOutcomesPage.tsx");
     const learning = source("client/src/pages/LearningMapPage.tsx");
     expect(links).toContain("已完成公開同意紀錄");
-    expect(outcomes).toContain("已記錄公開同意");
-    expect(outcomes).toContain("此學年尚無可公開的專案成果");
-    expect(learning).toContain("不以範例或假資料補足");
+    expect(outcomes).toContain("合作過的企業");
+    expect(outcomes).toContain("目前尚未提供可公開刊登的合作企業資料");
+    expect(learning).toContain("系統不會建立或展示虛構題庫");
   });
 
   it("公開路由與顯示效果支援正式入口及減少動態偏好", () => {
@@ -166,8 +166,9 @@ describe("公開頁尾與招生 FAQ", () => {
     expect(home).not.toContain("FloatingTableOfContents");
     expect(departments).toContain("departmentSections");
     expect(departments).toContain("trackScroll={false}");
-    expect(learning).toContain("learning-stage-${step}");
-    expect(learning).toContain("trackScroll={false}");
+    expect(learning).toContain("學習與職涯地圖");
+    expect(learning).toContain("learningCareerMap.list");
+    expect(learning).toContain("refetchInterval: 15_000");
     expect(links).toContain('id="official-links"');
     expect(links).toContain('id="public-resources"');
     expect(stylesheet).toContain(".floating-toc");

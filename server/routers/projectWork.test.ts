@@ -27,4 +27,26 @@ describe("MVP-2 專案工作資料範圍", () => {
     expect(source).toContain("canUserReadScopedResource(ctx.user.id, resource)");
     expect(source).toContain("projectDeliverables");
   });
+
+  it("以八個固定階段限制前進、要求退回原因並鎖定後續文件", () => {
+    expect(source).toContain("PROJECT_WORKFLOW_STAGES");
+    expect(source).toContain("流程只能逐階段前進，不能跳過階段");
+    expect(source).toContain("退回專案階段時必須填寫原因");
+    expect(source).toContain('set({ status: "locked" })');
+    expect(source).toContain("project.workflow_rolled_back");
+  });
+
+  it("流程文件採封存取代硬刪除，並通知有效專案成員", () => {
+    expect(source).toContain("workflow_document_archived");
+    expect(source).toContain("notifyActiveProjectMembers");
+    expect(source).toContain("personalNotifications");
+    expect(source).not.toContain("delete(projectStageDocuments)");
+  });
+
+  it("職涯地圖僅允許有效專案生或具明確專案管理權限者讀取", () => {
+    expect(source).toContain("hasWorkflowDirectoryAccess");
+    expect(source).toContain("learningCareerMap");
+    expect(source).toContain("requireCurriculumManager");
+    expect(source).toContain("learningCareerResourceMappings");
+  });
 });

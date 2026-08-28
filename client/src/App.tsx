@@ -24,6 +24,8 @@ const MemberWorkspacePage = lazy(() => import("./pages/MemberWorkspacePage"));
 const ManagementWorkspacePage = lazy(() => import("./pages/ManagementWorkspacePage"));
 const ProjectContentManagementPage = lazy(() => import("./pages/ProjectContentManagementPage"));
 const ResearchArchive = lazy(() => import("./pages/ResearchArchive"));
+const ProjectListPage = lazy(() => import("./pages/ProjectListPage"));
+const ProjectDetailPage = lazy(() => import("./pages/ProjectDetailPage"));
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -41,6 +43,8 @@ function Router() {
       <Route path={"/events"} component={EventsPage} />
       <Route path={"/links"} component={PublicLinksPage} />
       <Route path={"/learning"} component={LearningMapPage} />
+      <Route path={"/projects/:id"} component={ProjectDetailPage} />
+      <Route path={"/projects"} component={ProjectListPage} />
       <Route path={"/outcomes"} component={PublicOutcomesPage} />
       <Route path={"/departments"} component={DepartmentsPage} />
       <Route path={"/workspace"} component={MemberWorkspacePage} />
